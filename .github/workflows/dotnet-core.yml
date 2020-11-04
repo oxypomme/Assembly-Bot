@@ -5,7 +5,7 @@ on:
     branches: [ master ]
 
 jobs:
-  #build:
+  build:
     #name: dotnet build
     #runs-on: ubuntu-latest
     #steps:
@@ -23,40 +23,34 @@ jobs:
   publish:
     name: ssh pull, build and run
     runs-on: ubuntu-latest
-    #needs: [build]
+    needs: [build]
     steps:
-    - name: Configure SSH
-        run: |
-          mkdir -p ~/.ssh/
-          echo "$SSH_KEY" > ~/.ssh/staging.key
-          chmod 600 ~/.ssh/staging.key
-          cat >>~/.ssh/config <<END
-          Host staging
-            HostName $SSH_HOST
-            User $SSH_USER
-            IdentityFile ~/.ssh/staging.key
-            StrictHostKeyChecking no
-          END
-        env:
-          SSH_USER: ${{ secrets.USERNAME }}
-          SSH_KEY: ${{ secrets.KEY }}
-          SSH_HOST: ${{ secrets.HOST }}
     - name: Test
-      run: whoami
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.HOST }}
+        username: ${{ secrets.USERNAME }}
+        password : ${{ secrets.PASSWORD }}
+        port: ${{ secrets.PORT }}
+        command: whoami
     - name: Pull
-      uses: garygrossgarten/github-action-ssh@release
+      uses: appleboy/ssh-action@master
       with:
         host: ${{ secrets.HOST }}
         username: ${{ secrets.USERNAME }}
-        privateKey: ${{ secrets.KEY }}
+        key: ${{ secrets.KEY }}
         port: ${{ secrets.PORT }}
-        command: cd ~/Assembly-Bot && git pull
+        command: |
+          cd ~/Assembly-Bot
+          git pull
     - name: Build
-      uses: garygrossgarten/github-action-ssh@release
+      uses: appleboy/ssh-action@master
       with:
         host: ${{ secrets.HOST }}
         username: ${{ secrets.USERNAME }}
-        privateKey : ${{ secrets.KEY }}
+        key : ${{ secrets.KEY }}
         port: ${{ secrets.PORT }}
-        command: cd ~/Assembly-Bot && dotnet build
+        command: |
+          cd ~/Assembly-Bot
+          dotnet build
     #- name: Run
