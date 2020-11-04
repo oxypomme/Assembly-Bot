@@ -18,21 +18,22 @@ jobs:
       run: dotnet restore
     - name: Build
       run: dotnet build --configuration Release --no-restore
-    - name: Test
-      run: dotnet test --no-restore --verbosity normal
+    #- name: Test
+    #  run: dotnet test --no-restore --verbosity normal
   publish:
     name: ssh pull, build and run
     runs-on: ubuntu-latest
     needs: [build]
     steps:
-    - name: Test
-      uses: appleboy/ssh-action@master
-      with:
-        host: ${{ secrets.HOST }}
-        username: ${{ secrets.USERNAME }}
-        password : ${{ secrets.PASSWORD }}
-        port: ${{ secrets.PORT }}
-        script: whoami
+    # - name: Kill bot
+    #   uses: appleboy/ssh-action@master
+    #   with:
+    #     host: ${{ secrets.HOST }}
+    #     username: ${{ secrets.USERNAME }}
+    #     password : ${{ secrets.PASSWORD }}
+    #     port: ${{ secrets.PORT }}
+    #     script: |
+    #        screen -X -S assemblybot quit
     - name: Pull
       uses: appleboy/ssh-action@master
       with:
@@ -53,4 +54,14 @@ jobs:
         script: |
           cd ~/Assembly-Bot
           /usr/bin/dotnet/dotnet build
-    #- name: Run
+    - name: Run Bot
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.HOST }}
+        username: ${{ secrets.USERNAME }}
+        password : ${{ secrets.PASSWORD }}
+        port: ${{ secrets.PORT }}
+        script: |
+          screen -S assemblybot
+          cd ~/Assembly-Bot
+          /usr/bin/dotnet/dotnet run
