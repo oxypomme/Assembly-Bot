@@ -1,6 +1,7 @@
 ﻿using Discord;
 using Discord.WebSocket;
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Assembly_Bot
@@ -15,7 +16,7 @@ namespace Assembly_Bot
         {
             _client = new DiscordSocketClient();
             _client.Log += Log;
-            await _client.LoginAsync(TokenType.Bot, System.IO.File.ReadAllText("token.txt"));
+            await _client.LoginAsync(TokenType.Bot, System.IO.File.ReadLines("token.txt").First());
             await _client.StartAsync();
             await Task.Delay(-1);
         }
