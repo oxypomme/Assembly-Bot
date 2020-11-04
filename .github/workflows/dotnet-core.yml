@@ -33,7 +33,7 @@ jobs:
         password : ${{ secrets.PASSWORD }}
         port: ${{ secrets.PORT }}
         script: |
-           screen -X -S assemblybot quit
+           screen -X -S "assemblybot" quit
     - name: Pull
       uses: appleboy/ssh-action@master
       with:
@@ -63,5 +63,4 @@ jobs:
         port: ${{ secrets.PORT }}
         script: |
           cd ~/Assembly-Bot
-          screen -m -S assemblybot
-          /usr/bin/dotnet/dotnet run -c Release
+          screen -S "assemblybot" -dm bash -c "cd ~/Assembly-Bot; /usr/bin/dotnet/dotnet run -c Release"
