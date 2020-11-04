@@ -23,7 +23,7 @@ jobs:
   publish:
     name: ssh pull, build and run
     runs-on: ubuntu-latest
-    needs: [build]
+    #needs: [build]
     steps:
     - name: Test
       uses: garygrossgarten/github-action-ssh@release
