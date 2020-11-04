@@ -62,4 +62,5 @@ jobs:
         password : ${{ secrets.PASSWORD }}
         port: ${{ secrets.PORT }}
         script: |
-          screen -S "assemblybot" -dm bash -c "cd ~/Assembly-Bot; /usr/bin/dotnet/dotnet run -c Release"
+          screen -dmS "assemblybot"
+          screen -S "assemblybot" -p 0 -X stuff "cd ~/Assembly-Bot && /usr/bin/dotnet/dotnet run -c Release \n"
