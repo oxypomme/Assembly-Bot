@@ -26,31 +26,27 @@ jobs:
     needs: [build]
     steps:
     - name: Test
-      uses: appleboy/ssh-action@master
+      uses: garygrossgarten/github-action-ssh@release
       with:
         host: ${{ secrets.HOST }}
         username: ${{ secrets.USERNAME }}
         key: ${{ secrets.KEY }}
         port: ${{ secrets.PORT }}
-        script: whoami
+        command: whoami
     - name: Pull
-      uses: appleboy/ssh-action@master
+      uses: garygrossgarten/github-action-ssh@release
       with:
         host: ${{ secrets.HOST }}
         username: ${{ secrets.USERNAME }}
         key: ${{ secrets.KEY }}
         port: ${{ secrets.PORT }}
-        script: |
-          cd ~/Assembly-Bot
-          git pull
+        command: cd ~/Assembly-Bot && git pull
     - name: Build
-      uses: appleboy/ssh-action@master
+      uses: garygrossgarten/github-action-ssh@release
       with:
         host: ${{ secrets.HOST }}
         username: ${{ secrets.USERNAME }}
         key: ${{ secrets.KEY }}
         port: ${{ secrets.PORT }}
-        script: |
-          cd ~/Assembly-Bot
-          dotnet build
+        command: cd ~/Assembly-Bot && dotnet build
     #- name: Run
