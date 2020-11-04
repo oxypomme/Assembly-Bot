@@ -27,6 +27,7 @@ jobs:
     steps:
     - name: Kill bot
       uses: appleboy/ssh-action@master
+      continue-on-error: true
       with:
         host: ${{ secrets.HOST }}
         username: ${{ secrets.USERNAME }}
