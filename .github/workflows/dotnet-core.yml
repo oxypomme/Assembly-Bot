@@ -25,14 +25,24 @@ jobs:
     runs-on: ubuntu-latest
     #needs: [build]
     steps:
+    - name: Configure SSH
+        run: |
+          mkdir -p ~/.ssh/
+          echo "$SSH_KEY" > ~/.ssh/staging.key
+          chmod 600 ~/.ssh/staging.key
+          cat >>~/.ssh/config <<END
+          Host staging
+            HostName $SSH_HOST
+            User $SSH_USER
+            IdentityFile ~/.ssh/staging.key
+            StrictHostKeyChecking no
+          END
+        env:
+          SSH_USER: ${{ secrets.USERNAME }}
+          SSH_KEY: ${{ secrets.KEY }}
+          SSH_HOST: ${{ secrets.HOST }}
     - name: Test
-      uses: garygrossgarten/github-action-ssh@release
-      with:
-        host: ${{ secrets.HOST }}
-        username: ${{ secrets.USERNAME }}
-        privateKey: ${{ secrets.KEY }}
-        port: ${{ secrets.PORT }}
-        command: whoami
+      run: whoami
     - name: Pull
       uses: garygrossgarten/github-action-ssh@release
       with:
