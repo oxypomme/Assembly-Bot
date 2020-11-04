@@ -15,7 +15,7 @@ namespace Assembly_Bot
         {
             _client = new DiscordSocketClient();
             _client.Log += Log;
-            await _client.LoginAsync(TokenType.Bot, System.IO.File.ReadAllText("token.txt")); //TODO: in a file pls
+            await _client.LoginAsync(TokenType.Bot, System.IO.File.ReadAllText("token.txt"));
             await _client.StartAsync();
             await Task.Delay(-1);
         }
