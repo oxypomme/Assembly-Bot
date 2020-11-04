@@ -1,4 +1,4 @@
-name: Addembly-Bot Actions
+name: Assembly-Bot Actions
 
 on:
   push:
@@ -30,7 +30,7 @@ jobs:
       with:
         host: ${{ secrets.HOST }}
         username: ${{ secrets.USERNAME }}
-        key: ${{ secrets.KEY }}
+        password : ${{ secrets.PASSWORD }}
         port: ${{ secrets.PORT }}
         command: whoami
     - name: Pull
@@ -38,7 +38,7 @@ jobs:
       with:
         host: ${{ secrets.HOST }}
         username: ${{ secrets.USERNAME }}
-        key: ${{ secrets.KEY }}
+        privateKey: ${{ secrets.KEY }}
         port: ${{ secrets.PORT }}
         command: cd ~/Assembly-Bot && git pull
     - name: Build
@@ -46,7 +46,7 @@ jobs:
       with:
         host: ${{ secrets.HOST }}
         username: ${{ secrets.USERNAME }}
-        key: ${{ secrets.KEY }}
+        privateKey : ${{ secrets.KEY }}
         port: ${{ secrets.PORT }}
         command: cd ~/Assembly-Bot && dotnet build
     #- name: Run
