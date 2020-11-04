@@ -32,15 +32,15 @@ jobs:
         username: ${{ secrets.USERNAME }}
         password : ${{ secrets.PASSWORD }}
         port: ${{ secrets.PORT }}
-        command: whoami
+        script: whoami
     - name: Pull
       uses: appleboy/ssh-action@master
       with:
         host: ${{ secrets.HOST }}
         username: ${{ secrets.USERNAME }}
-        key: ${{ secrets.KEY }}
+        password : ${{ secrets.PASSWORD }}
         port: ${{ secrets.PORT }}
-        command: |
+        script: |
           cd ~/Assembly-Bot
           git pull
     - name: Build
@@ -48,9 +48,9 @@ jobs:
       with:
         host: ${{ secrets.HOST }}
         username: ${{ secrets.USERNAME }}
-        key : ${{ secrets.KEY }}
+        password : ${{ secrets.PASSWORD }}
         port: ${{ secrets.PORT }}
-        command: |
+        script: |
           cd ~/Assembly-Bot
           dotnet build
     #- name: Run
