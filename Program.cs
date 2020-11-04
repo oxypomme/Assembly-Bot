@@ -29,7 +29,7 @@ namespace Assembly_Bot
             await Task.Delay(-1);
         }
 
-        private Task Log(LogMessage msg)
+        private Task Log(LogMessage message)
         {
             switch (message.Severity)
             {
