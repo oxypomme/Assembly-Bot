@@ -64,4 +64,4 @@ jobs:
         port: ${{ secrets.PORT }}
         script: |
           screen -dmS "assemblybot"
-          screen -S "assemblybot" -p 0 -X stuff "cd ~/Assembly-Bot && set DOTNET_ROOT=/usr/bin/dotnet/ && set DOTNET_MULTILEVEL_LOOKUP=0 && set PATH=/usr/bin/dotnet/:$PATH && dotnet run -c Release \n"
+          screen -S "assemblybot" -p 0 -X stuff "cd ~/Assembly-Bot && export DOTNET_ROOT=/usr/bin/dotnet/ && export DOTNET_MULTILEVEL_LOOKUP=0 && export PATH=$PATH:/usr/bin/dotnet/ && dotnet run -c Release \n"
