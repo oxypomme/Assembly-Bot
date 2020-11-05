@@ -52,15 +52,15 @@ namespace Assembly_Bot
                 return Task.CompletedTask;
             };
 
-            await _client.LoginAsync(TokenType.Bot, System.IO.File.ReadLines("token.txt").First());
+            await _client.LoginAsync(TokenType.Bot, File.ReadLines("token.txt").First());
             await _client.StartAsync();
 
             await services.GetRequiredService<CommandHandler>().InstallCommandsAsync();
 
 #if DEBUG
-            await _client.SetGameAsync("je suis en labo aled !", type: ActivityType.CustomStatus);
+            await _client.SetGameAsync("je suis en labo aled !", type: ActivityType.CustomStatus).ConfigureAwait(false);
 #else
-            await _client.SetGameAsync("Protecting the Assembly Project", type: ActivityType.CustomStatus);
+            await _client.SetGameAsync("Protecting the Assembly Project", type: ActivityType.CustomStatus).ConfigureAwait(false);
 #endif
 
             _client.UserVoiceStateUpdated += VoiceUtils.GroupChatToClean;
@@ -70,7 +70,7 @@ namespace Assembly_Bot
                 var sev = LogSeverity.Info;
                 if (edt.Success != "true")
                     sev = LogSeverity.Error;
-                await Log(new LogMessage(sev, "EDT Load", edt.Success));
+                await Log(new LogMessage(sev, "EDT Load", edt.Success)).ConfigureAwait(false);
             }
 
 #if DEBUG
@@ -85,7 +85,7 @@ namespace Assembly_Bot
             await Task.Delay(-1);
         }
 
-        public void AlertStudents(object sender, System.Timers.ElapsedEventArgs e)
+        public async void AlertStudents(object sender, System.Timers.ElapsedEventArgs e)
         {
             if (edt.Weeks[0].Days.Count >= (int)DateTime.Today.DayOfWeek)
             {
@@ -110,12 +110,14 @@ namespace Assembly_Bot
                             channel = _client.GetGuild(773545167117746198).GetTextChannel(773546790090833920); // APSU - grp3
 #endif
                         if (timeLeft.TotalHours == 0 && timeLeft.Minutes == 5)
-                            channel.SendMessageAsync($"@ everyone : {eventSplitted[0]} dans 5 minutes.");
-                        if (timeLeft.TotalHours == 0 && timeLeft.Minutes == 15)
-                            channel.SendMessageAsync($"@ here : {eventSplitted[0]} dans 15 minutes.");
+                            await channel.SendMessageAsync($"@ everyone : {eventSplitted[0]} dans 5 minutes.");
+                        else if (timeLeft.TotalHours == 0 && timeLeft.Minutes == 15)
+                            await channel.SendMessageAsync($"@ here : {eventSplitted[0]} dans 15 minutes.");
                     }
                 }
             }
+            else
+                await ReloadEdt().ConfigureAwait(false);
         }
 
         private Task Log(LogMessage message)
