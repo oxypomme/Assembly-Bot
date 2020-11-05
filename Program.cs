@@ -2,8 +2,11 @@
 using Discord.Commands;
 using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
+using Newtonsoft.Json;
 using System;
+using System.IO;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 
 namespace Assembly_Bot
@@ -14,6 +17,11 @@ namespace Assembly_Bot
 
         public Program()
         {
+            //var edt = JsonConvert.DeserializeObject<Models.Edt>(new WebClient().DownloadString("http://wildgoat.fr/api/info-ical-json.php?url=" + System.Web.HttpUtility.UrlEncode("https%3A%2F%2Fdptinfo.iutmetz.univ-lorraine.fr%2Flna%2Fagendas%2Fical.php%3Fical%3D4352c5485001785") + "&week=1"));
+            //foreach (var week in edt.Weeks)
+            //    foreach (var day in week.Days)
+            //        foreach (var evnt in day.Events)
+            //            Console.WriteLine(evnt);
         }
 
         public static void Main(string[] args) => new Program().MainAsync().GetAwaiter().GetResult();
