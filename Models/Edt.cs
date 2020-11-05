@@ -9,6 +9,9 @@ namespace Assembly_Bot.Models
     {
         [JsonPropertyName("weeks")]
         public List<Week> Weeks { get; set; }
+
+        [JsonPropertyName("success")]
+        public string Success { get; set; }
     }
 
     public class Week
@@ -37,19 +40,19 @@ namespace Assembly_Bot.Models
             {
                 return DateTime.ParseExact((string)dtstart[0], "yyyyMMddTHHmmss", null);
             }
-            private set => dtstart[0] = value.ToString();
+            set => dtstart[0] = value.ToString();
         }
 
-        public List<object> dtend { get; set; }
+        public List<object> dtend;
 
-        [JsonPropertyName("dtend")]
+        [JsonIgnore]
         public DateTime Dtend
         {
             get
             {
                 return DateTime.ParseExact((string)dtend[0], "yyyyMMddTHHmmss", null);
             }
-            private set => dtstart[0] = value.ToString();
+            set => dtstart[0] = value.ToString();
         }
 
         [JsonPropertyName("location")]

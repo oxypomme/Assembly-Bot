@@ -7,21 +7,29 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Assembly_Bot
 {
     public class Program
     {
+        public static Models.Edt edt;
         private DiscordSocketClient _client;
+        private System.Timers.Timer _timer;
 
         public Program()
         {
-            //var edt = JsonConvert.DeserializeObject<Models.Edt>(new WebClient().DownloadString("http://wildgoat.fr/api/info-ical-json.php?url=" + System.Web.HttpUtility.UrlEncode("https%3A%2F%2Fdptinfo.iutmetz.univ-lorraine.fr%2Flna%2Fagendas%2Fical.php%3Fical%3D4352c5485001785") + "&week=1"));
-            //foreach (var week in edt.Weeks)
-            //    foreach (var day in week.Days)
-            //        foreach (var evnt in day.Events)
-            //            Console.WriteLine(evnt);
+        }
+
+        public static async Task ReloadEdt()
+        {
+            using (var client = new WebClient())
+            {
+                //var url = new Uri("http://wildgoat.fr/api/info-ical-json.php?url=" + System.Web.HttpUtility.UrlEncode("https://dptinfo.iutmetz.univ-lorraine.fr/lna/agendas/ical.php?ical=4352c5485001785") + "&week=1");
+                var url = new Uri("http://wildgoat.fr/api/info-ical-json.php?url=4352c5485001785&week=1");
+                edt = JsonConvert.DeserializeObject<Models.Edt>(await client.DownloadStringTaskAsync(url));
+            }
         }
 
         public static void Main(string[] args) => new Program().MainAsync().GetAwaiter().GetResult();
@@ -57,7 +65,57 @@ namespace Assembly_Bot
 
             _client.UserVoiceStateUpdated += VoiceUtils.GroupChatToClean;
 
+            await ReloadEdt();
+            {
+                var sev = LogSeverity.Info;
+                if (edt.Success != "true")
+                    sev = LogSeverity.Error;
+                await Log(new LogMessage(sev, "EDT Load", edt.Success));
+            }
+
+#if DEBUG
+            _timer = new System.Timers.Timer(10000);
+#else
+            _timer = new System.Timers.Timer(30000);
+#endif
+            _timer.Elapsed += AlertStudents;
+            _timer.AutoReset = true;
+            _timer.Enabled = true;
+
             await Task.Delay(-1);
+        }
+
+        public void AlertStudents(object sender, System.Timers.ElapsedEventArgs e)
+        {
+            if (edt.Weeks[0].Days.Count >= (int)DateTime.Today.DayOfWeek)
+            {
+                var day = edt.Weeks[0].Days[(int)DateTime.Today.DayOfWeek - 1];
+                SocketTextChannel channel;
+#if DEBUG
+                channel = _client.GetGuild(436909627834368010).GetTextChannel(773611076557602836); // Sandbox - assembly_bot
+#endif
+                foreach (var evnt in day.Events)
+                {
+                    var timeLeft = evnt.Dtstart.Subtract(DateTime.Now);
+                    if (timeLeft.TotalHours == 0 && timeLeft.Minutes <= 15)
+                    {
+                        var eventSplitted = evnt.Summary.Split(" - ");
+                        // Mat - Group - Room - Type
+#if !DEBUG
+                        if (eventSplitted[1].EndsWith("grp3.1"))
+                            channel = _client.GetGuild(773545167117746198).GetTextChannel(773546828947259443); // APSU - grp3-1
+                        else if (eventSplitted[1].EndsWith("grp3.2"))
+                            channel = _client.GetGuild(773545167117746198).GetTextChannel(773546852183310337); // APSU - grp3-2
+                        else
+                            channel = _client.GetGuild(773545167117746198).GetTextChannel(773546790090833920); // APSU - grp3
+#endif
+                        if (timeLeft.TotalHours == 0 && timeLeft.Minutes == 5)
+                            channel.SendMessageAsync($"@ everyone : {eventSplitted[0]} dans 5 minutes.");
+                        if (timeLeft.TotalHours == 0 && timeLeft.Minutes == 15)
+                            channel.SendMessageAsync($"@ here : {eventSplitted[0]} dans 15 minutes.");
+                    }
+                }
+            }
         }
 
         private Task Log(LogMessage message)
