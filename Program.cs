@@ -14,7 +14,6 @@ namespace Assembly_Bot
 
         public Program()
         {
-
         }
 
         public static void Main(string[] args) => new Program().MainAsync().GetAwaiter().GetResult();
@@ -47,6 +46,8 @@ namespace Assembly_Bot
 #else
             await _client.SetGameAsync("Protecting the Assembly Project", type: ActivityType.CustomStatus);
 #endif
+
+            _client.UserVoiceStateUpdated += VoiceUtils.GroupChatToClean;
 
             await Task.Delay(-1);
         }
