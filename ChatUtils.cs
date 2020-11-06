@@ -30,7 +30,7 @@ namespace Assembly_Bot
 
         public static Embed CreateEmbed(EmbedBuilder builder)
         {
-            builder.WithFooter(new EmbedFooterBuilder() { Text = "by OxyTom#1831" }).WithTimestamp(DateTimeOffset.Now);
+            builder.WithFooter(new EmbedFooterBuilder() { Text = "by OxyTom#1831" }).WithTimestamp(DateTimeOffset.Now).WithAuthor(Program.services.GetRequiredService<DiscordSocketClient>().CurrentUser);
             return builder.Build();
         }
 
