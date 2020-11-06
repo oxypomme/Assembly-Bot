@@ -181,7 +181,7 @@ namespace Assembly_Bot
                     Footer = new EmbedFooterBuilder() { Text = "by OxyTom#1831" }
                 }
                 .WithAuthor(_client.CurrentUser)
-                .Build());
+                .Build()).ConfigureAwait(true);
             }
             Console.ResetColor();
         }
