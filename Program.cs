@@ -66,19 +66,7 @@ namespace Assembly_Bot
 
             _client.UserVoiceStateUpdated += VoiceUtils.GroupChatToClean;
 
-            await ReloadEdt();
-            {
-                var sev = LogSeverity.Info;
-                string err = "true";
-                foreach (var edt in edts)
-                    if (edt.Success != "true")
-                    {
-                        sev = LogSeverity.Error;
-                        err = edt.Success;
-                        break;
-                    }
-                await Log(new LogMessage(sev, "EDT Load", err)).ConfigureAwait(false);
-            }
+            await ReloadEdt().ConfigureAwait(false);
 
 #if DEBUG
             _timer = new System.Timers.Timer(10000);
