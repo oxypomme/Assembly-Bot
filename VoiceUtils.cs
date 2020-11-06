@@ -23,7 +23,7 @@ namespace Assembly_Bot
                     await ChatUtils.CleanChannel(channel, 1);
                 }
 #else
-                if ((oldVoiceState.VoiceChannel.Name.StartsWith("Duo") || oldVoiceState.VoiceChannel.Name.StartsWith("Trio")) && oldVoiceState.VoiceChannel.Users.Count == 0)
+                if ((oldVoiceState.VoiceChannel.Name.StartsWith("Duo") || oldVoiceState.VoiceChannel.Name.StartsWith("Trio") || oldVoiceState.VoiceChannel.Name.StartsWith("Quatuor")) && oldVoiceState.VoiceChannel.Users.Count == 0)
                 {
                     var channel = oldVoiceState.VoiceChannel.Guild.TextChannels.First(chan => chan.Name == oldVoiceState.VoiceChannel.Name.ToLower());
                     await ChatUtils.CleanChannel(channel, 100);

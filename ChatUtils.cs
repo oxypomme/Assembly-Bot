@@ -17,5 +17,14 @@ namespace Assembly_Bot
 
             await (channel as SocketTextChannel).DeleteMessagesAsync(messages);
         }
+
+        [RequireBotPermission(ChannelPermission.SendMessages)]
+        public static async Task PingMessage(ISocketMessageChannel channel, string message, IMentionable mentionable = null)
+        {
+            if (mentionable == null)
+                await channel.SendMessageAsync("@here" + " : " + message);
+            else
+                await channel.SendMessageAsync(mentionable + " : " + message);
+        }
     }
 }
