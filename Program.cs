@@ -50,18 +50,10 @@ namespace Assembly_Bot
             _client.Ready += async () =>
             {
                 await Log(new LogMessage(LogSeverity.Info, "Ready", $"Connected as {_client.CurrentUser} on {_client.Guilds.Count} servers"));
-                //PM me the start timestamps
-                await (await _client.GetUser(151261754704265216).GetOrCreateDMChannelAsync()).SendMessageAsync(embed: new EmbedBuilder()
-                {
-                    Title = "Hello world",
-                    Description = "I've just awoken my master !",
-                    Timestamp = DateTimeOffset.Now,
-                    Color = Color.Green,
-                    Footer = new EmbedFooterBuilder() { Text = "by OxyTom#1831" }
-                }
-                .AddField("Launch platform", Environment.OSVersion + "\nat " + DateTime.Now.ToString("HH:mm:ss"))
-                .WithAuthor(_client.CurrentUser)
-                .Build());
+
+                var fields = new List<EmbedFieldBuilder>();
+                fields.Add(new EmbedFieldBuilder() { Name = "Launch platform", Value = Environment.OSVersion + "\nat " + DateTime.Now.ToString("HH:mm:ss") });
+                await PMOwner("Hello world", "I've just awoken my master !", Color.Green, fields).ConfigureAwait(true);
             };
 
             await _client.LoginAsync(TokenType.Bot, File.ReadLines("token.txt").First());
@@ -170,20 +162,26 @@ namespace Assembly_Bot
             }
             Console.WriteLine($"{DateTime.Now,-19} [{message.Severity}] {message.Source}: {message.Message} {message.Exception}");
             if (_client.ConnectionState == ConnectionState.Connected && message.Severity < LogSeverity.Info)
-            {
-                //PM me the start timestamps
-                await (await _client.GetUser(151261754704265216).GetOrCreateDMChannelAsync()).SendMessageAsync(embed: new EmbedBuilder()
-                {
-                    Title = "Something went wrong",
-                    Description = "*" + message.Source + "*\n" + message.Message,
-                    Timestamp = DateTimeOffset.Now,
-                    Color = color,
-                    Footer = new EmbedFooterBuilder() { Text = "by OxyTom#1831" }
-                }
-                .WithAuthor(_client.CurrentUser)
-                .Build()).ConfigureAwait(true);
-            }
+                await PMOwner("Something went wrong", "*" + message.Source + "*\n" + message.Message, color).ConfigureAwait(true);
             Console.ResetColor();
+        }
+
+        private async Task PMOwner(string title, string message, Color color, List<EmbedFieldBuilder> fields = null)
+        {
+            //PM me the thing
+            var builder = new EmbedBuilder()
+            {
+                Title = title,
+                Description = message,
+                Timestamp = DateTimeOffset.Now,
+                Color = color,
+                Footer = new EmbedFooterBuilder() { Text = "by OxyTom#1831" }
+            }.WithAuthor(_client.CurrentUser);
+            foreach (var field in fields)
+
+                builder.AddField(field);
+
+            await (await _client.GetUser(151261754704265216).GetOrCreateDMChannelAsync()).SendMessageAsync(embed: builder.Build()).ConfigureAwait(true);
         }
     }
 }
