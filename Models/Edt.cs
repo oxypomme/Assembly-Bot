@@ -12,6 +12,9 @@ namespace Assembly_Bot.Models
 
         [JsonPropertyName("success")]
         public string Success { get; set; }
+
+        [JsonIgnore]
+        public string RawJson { get; set; }
     }
 
     public class Week

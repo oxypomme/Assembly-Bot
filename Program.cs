@@ -17,6 +17,9 @@ namespace Assembly_Bot
     {
         public static List<Models.Edt> edts = new List<Models.Edt>();
         public static ServiceProvider services;
+
+        private static readonly string[] edtCodes = { "4352c5485001785", "1c57595e2401824" };
+
         private DiscordSocketClient _client;
         private System.Timers.Timer _timer;
 
@@ -28,11 +31,52 @@ namespace Assembly_Bot
         {
             using var client = new WebClient();
             // grp3.1
-            edts.Add(JsonConvert.DeserializeObject<Models.Edt>(await client.DownloadStringTaskAsync(GetUriFromCode("4352c5485001785"))));
+            for (int i = 0; i < edtCodes.Length; i++)
+            {
+                var json = await client.DownloadStringTaskAsync(GetJSONUriFromCode("4352c5485001785"));
+                if (edts.Count == i)
+                    edts.Add(JsonConvert.DeserializeObject<Models.Edt>(json));
+                if (edts[i].RawJson == null || json.GetHashCode(StringComparison.OrdinalIgnoreCase) != edts[i].RawJson.GetHashCode(StringComparison.OrdinalIgnoreCase))
+                {
+                    // post Image
+                    await client.DownloadFileTaskAsync(GetIMGUriFromCode(edtCodes[i]), edtCodes[i] + ".png");
+                    await services.GetRequiredService<DiscordSocketClient>()
+#if DEBUG
+                        // Sandbox
+                        .GetGuild(436909627834368010)
+                        // assembly_bot
+                        .GetTextChannel(773611076557602836)
+#else
+                        // APSU
+                        .GetGuild(773545167117746198)
+                        // edt_3-1 : edt_3-2
+                        .GetTextChannel((ulong)(i % 2 == 0 ? 773550484677066782 : 773550604173049878))
+#endif
+                        .SendFileAsync(
+                        edtCodes[i] + ".png", "",
+                        embed: ChatUtils.CreateEmbed(
+                        new EmbedBuilder()
+                        {
+                            ImageUrl = $"attachment://{edtCodes[i]}.png"
+                        }
+                        )
+                    );
+                    edts[i] = JsonConvert.DeserializeObject<Models.Edt>(json);
+                    edts[i].RawJson = json;
+                }
+            }
             // grp3.2
-            edts.Add(JsonConvert.DeserializeObject<Models.Edt>(await client.DownloadStringTaskAsync(GetUriFromCode("1c57595e2401824"))));
-
-            static Uri GetUriFromCode(string id) => new Uri("http://wildgoat.fr/api/ical-json.php?url=" + System.Web.HttpUtility.UrlEncode("https://dptinfo.iutmetz.univ-lorraine.fr/lna/agendas/ical.php?ical=" + id) + "&week=1");
+            /*
+            json = await client.DownloadStringTaskAsync(GetJSONUriFromCode("1c57595e2401824"));
+            edts.Add(JsonConvert.DeserializeObject<Models.Edt>(json));
+            if (edts.Last().RawJson == null || json.GetHashCode(StringComparison.OrdinalIgnoreCase) != edts.Last().RawJson.GetHashCode(StringComparison.OrdinalIgnoreCase))
+            {
+                // post Image
+                edts.Last().RawJson = json;
+            }
+            */
+            static Uri GetJSONUriFromCode(string id) => new Uri("http://wildgoat.fr/api/ical-json.php?url=" + System.Web.HttpUtility.UrlEncode("https://dptinfo.iutmetz.univ-lorraine.fr/lna/agendas/ical.php?ical=" + id) + "&week=1");
+            static Uri GetIMGUriFromCode(string id) => new Uri("http://wildgoat.fr/api/ical-png.php?url=" + System.Web.HttpUtility.UrlEncode("https://dptinfo.iutmetz.univ-lorraine.fr/lna/agendas/ical.php?ical=" + id) + "&regex=" + Uri.EscapeDataString("/^(.*) - .* - .* - .*$/"));
         }
 
         public static void Main(string[] args) => new Program().MainAsync().GetAwaiter().GetResult();
