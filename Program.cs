@@ -95,7 +95,7 @@ namespace Assembly_Bot
                     foreach (var evnt in day.Events)
                     {
                         var timeLeft = evnt.Dtstart.Subtract(DateTime.Now);
-                        if (timeLeft.Hours == 0 && timeLeft.Minutes <= 15 && !(_isAlreadyAlerted.falert && _isAlreadyAlerted.salert))
+                        if (timeLeft.Hours == -1 && timeLeft.Minutes <= 15 && !(_isAlreadyAlerted.falert && _isAlreadyAlerted.salert))
                         {
                             var eventSplitted = evnt.Summary.Split(" - ");
                             // Mat - Group - Room - Type
@@ -118,7 +118,7 @@ namespace Assembly_Bot
                                 _isAlreadyAlerted.salert = true;
                             }
                         }
-                        else if ((timeLeft.Hours != 0 || timeLeft.Minutes != 10) && _isAlreadyAlerted.falert && _isAlreadyAlerted.salert)
+                        else if ((timeLeft.Hours != -1 || timeLeft.Minutes != 10) && _isAlreadyAlerted.falert && _isAlreadyAlerted.salert)
                         {
                             _isAlreadyAlerted.falert = false;
                             _isAlreadyAlerted.salert = false;
