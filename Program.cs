@@ -47,10 +47,21 @@ namespace Assembly_Bot
             _client.Log += Log;
             services.GetRequiredService<CommandService>().Log += Log;
 
-            _client.Ready += () =>
+            _client.Ready += async () =>
             {
-                Log(new LogMessage(LogSeverity.Info, "Ready", $"Connected as {_client.CurrentUser} on {_client.Guilds.Count} servers"));
-                return Task.CompletedTask;
+                await Log(new LogMessage(LogSeverity.Info, "Ready", $"Connected as {_client.CurrentUser} on {_client.Guilds.Count} servers"));
+                //PM me the start timestamps
+                await (await _client.GetUser(151261754704265216).GetOrCreateDMChannelAsync()).SendMessageAsync(embed: new EmbedBuilder()
+                {
+                    Title = "Hello world",
+                    Description = "I've just awoken my master !",
+                    Timestamp = DateTimeOffset.Now,
+                    Color = Color.Green,
+                    Footer = new EmbedFooterBuilder() { Text = "by OxyTom#1831" }
+                }
+                .AddField("Launch platform", Environment.OSVersion + "\nat " + DateTime.Now.ToString("HH:mm:ss"))
+                .WithAuthor(_client.CurrentUser)
+                .Build());
             };
 
             await _client.LoginAsync(TokenType.Bot, File.ReadLines("token.txt").First());
