@@ -59,9 +59,9 @@ namespace Assembly_Bot
             await services.GetRequiredService<CommandHandler>().InstallCommandsAsync();
 
 #if DEBUG
-            await _client.SetGameAsync("je suis en labo aled !", type: ActivityType.CustomStatus).ConfigureAwait(false);
+            await _client.SetGameAsync("laboratoire", type: ActivityType.Playing).ConfigureAwait(false);
 #else
-            await _client.SetGameAsync("Protecting the Assembly Project", type: ActivityType.CustomStatus).ConfigureAwait(false);
+            await _client.SetGameAsync("le prochain cours", type: ActivityType.Listening).ConfigureAwait(false);
 #endif
 
             _client.UserVoiceStateUpdated += VoiceUtils.GroupChatToClean;
