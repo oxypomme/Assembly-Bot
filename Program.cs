@@ -92,7 +92,10 @@ namespace Assembly_Bot
         public async void AlertStudents(object sender, System.Timers.ElapsedEventArgs e)
         {
             if (_lastUpdate <= DateTime.Now.AddHours(2))
+            {
+                _lastUpdate = DateTime.Now;
                 await ReloadEdt();
+            }
             foreach (var edt in edts)
                 if (edt.Weeks[0].Days.Count >= (int)DateTime.Today.DayOfWeek)
                 {
