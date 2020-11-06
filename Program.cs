@@ -143,17 +143,20 @@ namespace Assembly_Bot
                 }
         }
 
-        private Task Log(LogMessage message)
+        private async Task Log(LogMessage message)
         {
+            Color color = Color.Default;
             switch (message.Severity)
             {
                 case LogSeverity.Critical:
                 case LogSeverity.Error:
                     Console.ForegroundColor = ConsoleColor.Red;
+                    color = Color.Red;
                     break;
 
                 case LogSeverity.Warning:
                     Console.ForegroundColor = ConsoleColor.Yellow;
+                    color = Color.Orange;
                     break;
 
                 case LogSeverity.Info:
@@ -166,9 +169,21 @@ namespace Assembly_Bot
                     break;
             }
             Console.WriteLine($"{DateTime.Now,-19} [{message.Severity}] {message.Source}: {message.Message} {message.Exception}");
+            if (_client.ConnectionState == ConnectionState.Connected && message.Severity < LogSeverity.Info)
+            {
+                //PM me the start timestamps
+                await (await _client.GetUser(151261754704265216).GetOrCreateDMChannelAsync()).SendMessageAsync(embed: new EmbedBuilder()
+                {
+                    Title = "Something went wrong",
+                    Description = "*" + message.Source + "*\n" + message.Message,
+                    Timestamp = DateTimeOffset.Now,
+                    Color = color,
+                    Footer = new EmbedFooterBuilder() { Text = "by OxyTom#1831" }
+                }
+                .WithAuthor(_client.CurrentUser)
+                .Build());
+            }
             Console.ResetColor();
-
-            return Task.CompletedTask;
         }
     }
 }
