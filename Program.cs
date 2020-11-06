@@ -27,9 +27,12 @@ namespace Assembly_Bot
         {
             using (var client = new WebClient())
             {
-                //var url = new Uri("http://wildgoat.fr/api/info-ical-json.php?url=" + System.Web.HttpUtility.UrlEncode("https://dptinfo.iutmetz.univ-lorraine.fr/lna/agendas/ical.php?ical=4352c5485001785") + "&week=1");
-                var url = new Uri("http://wildgoat.fr/api/info-ical-json.php?url=4352c5485001785&week=1");
-                edts.Add(JsonConvert.DeserializeObject<Models.Edt>(await client.DownloadStringTaskAsync(url)));
+                // grp3.1
+                edts.Add(JsonConvert.DeserializeObject<Models.Edt>(await client.DownloadStringTaskAsync(GetUriFromCode("4352c5485001785"))));
+                // grp3.2
+                edts.Add(JsonConvert.DeserializeObject<Models.Edt>(await client.DownloadStringTaskAsync(GetUriFromCode("1c57595e2401824"))));
+
+                Uri GetUriFromCode(string id) => new Uri("http://wildgoat.fr/api/ical-json.php?url=" + System.Web.HttpUtility.UrlEncode("https://dptinfo.iutmetz.univ-lorraine.fr/lna/agendas/ical.php?ical=" + id) + "&week=1"); ;
             }
         }
 
@@ -84,9 +87,12 @@ namespace Assembly_Bot
         }
 
         private (bool falert, bool salert) _isAlreadyAlerted = (false, false);
+        private DateTime _lastUpdate = DateTime.Now;
 
         public async void AlertStudents(object sender, System.Timers.ElapsedEventArgs e)
         {
+            if (_lastUpdate <= DateTime.Now.AddHours(2))
+                await ReloadEdt();
             foreach (var edt in edts)
                 if (edt.Weeks[0].Days.Count >= (int)DateTime.Today.DayOfWeek)
                 {
@@ -127,11 +133,6 @@ namespace Assembly_Bot
                             _isAlreadyAlerted.salert = false;
                         }
                     }
-                }
-                else
-                {
-                    await ReloadEdt().ConfigureAwait(true);
-                    break;
                 }
         }
 
@@ -177,11 +178,13 @@ namespace Assembly_Bot
                 Color = color,
                 Footer = new EmbedFooterBuilder() { Text = "by OxyTom#1831" }
             }.WithAuthor(_client.CurrentUser);
-            foreach (var field in fields)
+            if (fields != null)
+                foreach (var field in fields)
+                    builder.AddField(field);
 
-                builder.AddField(field);
-
-            await (await _client.GetUser(151261754704265216).GetOrCreateDMChannelAsync()).SendMessageAsync(embed: builder.Build()).ConfigureAwait(true);
+            SocketUser oxy;
+            if ((oxy = _client.GetUser(151261754704265216)) != null)
+                await (await oxy.GetOrCreateDMChannelAsync()).SendMessageAsync(embed: builder.Build()).ConfigureAwait(true);
         }
     }
 }
