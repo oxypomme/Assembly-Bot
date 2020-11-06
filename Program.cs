@@ -56,7 +56,7 @@ namespace Assembly_Bot
 
                 var fields = new List<EmbedFieldBuilder>();
                 fields.Add(new EmbedFieldBuilder() { Name = "Launch platform", Value = Environment.OSVersion + "\nat " + DateTime.Now.ToString("HH:mm:ss") });
-                await PMOwner("Hello world", "I've just awoken my master !", Color.Green, fields).ConfigureAwait(true);
+                await LogOnDiscord("Hello world", "I've just awoken my master !", Color.Green, fields).ConfigureAwait(true);
             };
 
             await _client.LoginAsync(TokenType.Bot, File.ReadLines("token.txt").First());
@@ -139,12 +139,14 @@ namespace Assembly_Bot
         private async Task Log(LogMessage message)
         {
             Color color = Color.Default;
+            bool isImp = false;
             switch (message.Severity)
             {
                 case LogSeverity.Critical:
                 case LogSeverity.Error:
                     Console.ForegroundColor = ConsoleColor.Red;
                     color = Color.Red;
+                    isImp = true;
                     break;
 
                 case LogSeverity.Warning:
@@ -163,13 +165,12 @@ namespace Assembly_Bot
             }
             Console.WriteLine($"{DateTime.Now,-19} [{message.Severity}] {message.Source}: {message.Message} {message.Exception}");
             if (_client.ConnectionState == ConnectionState.Connected && message.Severity < LogSeverity.Info)
-                await PMOwner("Something went wrong", "*" + message.Source + "*\n" + message.Message, color).ConfigureAwait(true);
+                await LogOnDiscord("Something went wrong", "*" + message.Source + "*\n" + message.Message, color, isImportant: isImp).ConfigureAwait(true);
             Console.ResetColor();
         }
 
-        private async Task PMOwner(string title, string message, Color color, List<EmbedFieldBuilder> fields = null)
+        private async Task LogOnDiscord(string title, string message, Color color, List<EmbedFieldBuilder> fields = null, bool isImportant = false)
         {
-            //PM me the thing
             var builder = new EmbedBuilder()
             {
                 Title = title,
@@ -182,9 +183,10 @@ namespace Assembly_Bot
                 foreach (var field in fields)
                     builder.AddField(field);
 
-            SocketUser oxy;
-            if ((oxy = _client.GetUser(151261754704265216)) != null)
-                await (await oxy.GetOrCreateDMChannelAsync()).SendMessageAsync(embed: builder.Build()).ConfigureAwait(true);
+            // Sandbox - assembly_bot-log
+            var sandbox = _client.GetGuild(436909627834368010);
+            string mention = (isImportant && sandbox.Owner != null ? sandbox.Owner.Mention : "");
+            await sandbox.GetTextChannel(774398527718686781).SendMessageAsync(mention, embed: builder.Build()).ConfigureAwait(true);
         }
     }
 }
