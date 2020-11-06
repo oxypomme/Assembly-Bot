@@ -47,10 +47,13 @@ namespace Assembly_Bot
             _client.Log += Log;
             services.GetRequiredService<CommandService>().Log += Log;
 
-            _client.Ready += () =>
+            _client.Ready += async () =>
             {
-                Log(new LogMessage(LogSeverity.Info, "Ready", $"Connected as {_client.CurrentUser} on {_client.Guilds.Count} servers"));
-                return Task.CompletedTask;
+                await Log(new LogMessage(LogSeverity.Info, "Ready", $"Connected as {_client.CurrentUser} on {_client.Guilds.Count} servers"));
+
+                var fields = new List<EmbedFieldBuilder>();
+                fields.Add(new EmbedFieldBuilder() { Name = "Launch platform", Value = Environment.OSVersion + "\nat " + DateTime.Now.ToString("HH:mm:ss") });
+                await PMOwner("Hello world", "I've just awoken my master !", Color.Green, fields).ConfigureAwait(true);
             };
 
             await _client.LoginAsync(TokenType.Bot, File.ReadLines("token.txt").First());
@@ -59,26 +62,14 @@ namespace Assembly_Bot
             await services.GetRequiredService<CommandHandler>().InstallCommandsAsync();
 
 #if DEBUG
-            await _client.SetGameAsync("je suis en labo aled !", type: ActivityType.CustomStatus).ConfigureAwait(false);
+            await _client.SetGameAsync("laboratoire", type: ActivityType.Playing).ConfigureAwait(true);
 #else
-            await _client.SetGameAsync("Protecting the Assembly Project", type: ActivityType.CustomStatus).ConfigureAwait(false);
+            await _client.SetGameAsync("le prochain cours", type: ActivityType.Listening).ConfigureAwait(true);
 #endif
 
             _client.UserVoiceStateUpdated += VoiceUtils.GroupChatToClean;
 
-            await ReloadEdt();
-            {
-                var sev = LogSeverity.Info;
-                string err = "true";
-                foreach (var edt in edts)
-                    if (edt.Success != "true")
-                    {
-                        sev = LogSeverity.Error;
-                        err = edt.Success;
-                        break;
-                    }
-                await Log(new LogMessage(sev, "EDT Load", err)).ConfigureAwait(false);
-            }
+            await ReloadEdt().ConfigureAwait(true);
 
 #if DEBUG
             _timer = new System.Timers.Timer(10000);
@@ -139,22 +130,25 @@ namespace Assembly_Bot
                 }
                 else
                 {
-                    await ReloadEdt().ConfigureAwait(false);
+                    await ReloadEdt().ConfigureAwait(true);
                     break;
                 }
         }
 
-        private Task Log(LogMessage message)
+        private async Task Log(LogMessage message)
         {
+            Color color = Color.Default;
             switch (message.Severity)
             {
                 case LogSeverity.Critical:
                 case LogSeverity.Error:
                     Console.ForegroundColor = ConsoleColor.Red;
+                    color = Color.Red;
                     break;
 
                 case LogSeverity.Warning:
                     Console.ForegroundColor = ConsoleColor.Yellow;
+                    color = Color.Orange;
                     break;
 
                 case LogSeverity.Info:
@@ -167,9 +161,27 @@ namespace Assembly_Bot
                     break;
             }
             Console.WriteLine($"{DateTime.Now,-19} [{message.Severity}] {message.Source}: {message.Message} {message.Exception}");
+            if (_client.ConnectionState == ConnectionState.Connected && message.Severity < LogSeverity.Info)
+                await PMOwner("Something went wrong", "*" + message.Source + "*\n" + message.Message, color).ConfigureAwait(true);
             Console.ResetColor();
+        }
 
-            return Task.CompletedTask;
+        private async Task PMOwner(string title, string message, Color color, List<EmbedFieldBuilder> fields = null)
+        {
+            //PM me the thing
+            var builder = new EmbedBuilder()
+            {
+                Title = title,
+                Description = message,
+                Timestamp = DateTimeOffset.Now,
+                Color = color,
+                Footer = new EmbedFooterBuilder() { Text = "by OxyTom#1831" }
+            }.WithAuthor(_client.CurrentUser);
+            foreach (var field in fields)
+
+                builder.AddField(field);
+
+            await (await _client.GetUser(151261754704265216).GetOrCreateDMChannelAsync()).SendMessageAsync(embed: builder.Build()).ConfigureAwait(true);
         }
     }
 }
