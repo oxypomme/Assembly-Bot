@@ -1,6 +1,7 @@
 ﻿using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
+using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -25,6 +26,28 @@ namespace Assembly_Bot
                 await channel.SendMessageAsync("@here" + " : " + message);
             else
                 await channel.SendMessageAsync(mentionable + " : " + message);
+        }
+
+        public static Embed CreateEmbed(EmbedBuilder builder)
+        {
+            builder.WithFooter(new EmbedFooterBuilder() { Text = "by OxyTom#1831" }).WithTimestamp(DateTimeOffset.Now);
+            return builder.Build();
+        }
+
+        public static Embed CreateEmbed(string title, string message, Color color, List<EmbedFieldBuilder> fields = null)
+        {
+            var builder = new EmbedBuilder()
+            {
+                Title = title,
+                Description = message,
+                Timestamp = DateTimeOffset.Now,
+                Color = color,
+                Footer = new EmbedFooterBuilder() { Text = "by OxyTom#1831" }
+            }.WithAuthor(Program.services.GetRequiredService<DiscordSocketClient>().CurrentUser);
+            if (fields != null)
+                foreach (var field in fields)
+                    builder.AddField(field);
+            return builder.Build();
         }
     }
 }

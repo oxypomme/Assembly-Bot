@@ -16,6 +16,7 @@ namespace Assembly_Bot
     public class Program
     {
         public static List<Models.Edt> edts = new List<Models.Edt>();
+        public static ServiceProvider services;
         private DiscordSocketClient _client;
         private System.Timers.Timer _timer;
 
@@ -40,7 +41,7 @@ namespace Assembly_Bot
 
         public async Task MainAsync()
         {
-            using var services = new ServiceCollection()
+            services = new ServiceCollection()
                 .AddSingleton<DiscordSocketClient>()
                 .AddSingleton<CommandService>()
                 .AddSingleton<CommandHandler>()
@@ -171,22 +172,11 @@ namespace Assembly_Bot
 
         private async Task LogOnDiscord(string title, string message, Color color, List<EmbedFieldBuilder> fields = null, bool isImportant = false)
         {
-            var builder = new EmbedBuilder()
-            {
-                Title = title,
-                Description = message,
-                Timestamp = DateTimeOffset.Now,
-                Color = color,
-                Footer = new EmbedFooterBuilder() { Text = "by OxyTom#1831" }
-            }.WithAuthor(_client.CurrentUser);
-            if (fields != null)
-                foreach (var field in fields)
-                    builder.AddField(field);
-
-            // Sandbox - assembly_bot-log
+            // Sandbox
             var sandbox = _client.GetGuild(436909627834368010);
             string mention = (isImportant && sandbox.Owner != null ? sandbox.Owner.Mention : "");
-            await sandbox.GetTextChannel(774398527718686781).SendMessageAsync(mention, embed: builder.Build()).ConfigureAwait(true);
+            // assembly_bot-log
+            await sandbox.GetTextChannel(774398527718686781).SendMessageAsync(mention, embed: ChatUtils.CreateEmbed(title, message, color, fields)).ConfigureAwait(true);
         }
     }
 }
