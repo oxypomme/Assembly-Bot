@@ -48,7 +48,7 @@ namespace Assembly_Bot.Modules
 
                         await Task.Delay(secs * 1000);
                         await role.DeleteAsync();
-                        await startmsg.DeleteAsync().ConfigureAwait(false);
+                        await startmsg.DeleteAsync().ConfigureAwait(true);
 
                         const int delay = 5000;
                         var endmsg = await ReplyAsync($"{vchat.Name} is no longer muted. _This message will be deleted in {delay / 1000} seconds._");

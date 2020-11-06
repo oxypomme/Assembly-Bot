@@ -59,14 +59,14 @@ namespace Assembly_Bot
             await services.GetRequiredService<CommandHandler>().InstallCommandsAsync();
 
 #if DEBUG
-            await _client.SetGameAsync("laboratoire", type: ActivityType.Playing).ConfigureAwait(false);
+            await _client.SetGameAsync("laboratoire", type: ActivityType.Playing).ConfigureAwait(true);
 #else
-            await _client.SetGameAsync("le prochain cours", type: ActivityType.Listening).ConfigureAwait(false);
+            await _client.SetGameAsync("le prochain cours", type: ActivityType.Listening).ConfigureAwait(true);
 #endif
 
             _client.UserVoiceStateUpdated += VoiceUtils.GroupChatToClean;
 
-            await ReloadEdt().ConfigureAwait(false);
+            await ReloadEdt().ConfigureAwait(true);
 
 #if DEBUG
             _timer = new System.Timers.Timer(10000);
@@ -127,7 +127,7 @@ namespace Assembly_Bot
                 }
                 else
                 {
-                    await ReloadEdt().ConfigureAwait(false);
+                    await ReloadEdt().ConfigureAwait(true);
                     break;
                 }
         }
