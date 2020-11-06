@@ -31,34 +31,31 @@ namespace Assembly_Bot.Modules
         [RequireBotPermission(GuildPermission.ManageRoles)]
         public async Task MuteVoiceAsync(ulong vid = 0, int secs = 60)
         {
+            SocketVoiceChannel channel = Context.Guild.GetVoiceChannel(vid);
             if (vid == 0)
             {
-                var usr = Context.User;
                 foreach (SocketVoiceChannel vchat in Context.Guild.VoiceChannels)
-                {
-                    if (vchat.Users.Contains(usr))
+                    if (vchat.Users.Contains(Context.User))
                     {
-                        var role = await Context.Guild.CreateRoleAsync("Muted", new GuildPermissions(speak: false), Color.DarkGrey, false, null);
-                        await vchat.AddPermissionOverwriteAsync(role, new OverwritePermissions(speak: PermValue.Deny));
-                        foreach (var vuser in vchat.Users)
-                            await vuser.AddRoleAsync(role);
-
-                        var startmsg = await ReplyAsync($"{vchat.Name} is now muted for {secs} seconds.");
-                        await Context.Message.DeleteAsync();
-
-                        await Task.Delay(secs * 1000);
-                        await role.DeleteAsync();
-                        await startmsg.DeleteAsync().ConfigureAwait(true);
-
-                        const int delay = 5000;
-                        var endmsg = await ReplyAsync($"{vchat.Name} is no longer muted. _This message will be deleted in {delay / 1000} seconds._");
-                        await Task.Delay(delay);
-                        await endmsg.DeleteAsync();
-
+                        channel = vchat;
                         break;
                     }
-                }
             }
+
+            foreach (var vuser in channel.Users)
+                await vuser.ModifyAsync((user) => user.Mute = true);
+
+            var msg = await ReplyAsync($"{channel.Name} is now muted for {secs} seconds.");
+            await Context.Message.DeleteAsync();
+
+            await Task.Delay(secs * 1000);
+            foreach (var vuser in channel.Users)
+                await vuser.ModifyAsync((user) => user.Mute = false);
+
+            const int delay = 5000;
+            await msg.ModifyAsync(m => m.Content = $"{channel.Name} is no longer muted. _This message will be deleted in {delay / 1000} seconds._");
+            await Task.Delay(delay);
+            await msg.DeleteAsync();
         }
     }
 }
