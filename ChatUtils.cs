@@ -23,7 +23,7 @@ namespace Assembly_Bot
         public static async Task PingMessage(ISocketMessageChannel channel, string message, IMentionable mentionable = null)
         {
             if (mentionable == null)
-                await channel.SendMessageAsync("@here" + " : " + message);
+                await channel.SendMessageAsync("@here : " + message);
             else
                 await channel.SendMessageAsync(mentionable + " : " + message);
         }

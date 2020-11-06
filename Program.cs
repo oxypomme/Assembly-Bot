@@ -26,15 +26,13 @@ namespace Assembly_Bot
 
         public static async Task ReloadEdt()
         {
-            using (var client = new WebClient())
-            {
-                // grp3.1
-                edts.Add(JsonConvert.DeserializeObject<Models.Edt>(await client.DownloadStringTaskAsync(GetUriFromCode("4352c5485001785"))));
-                // grp3.2
-                edts.Add(JsonConvert.DeserializeObject<Models.Edt>(await client.DownloadStringTaskAsync(GetUriFromCode("1c57595e2401824"))));
+            using var client = new WebClient();
+            // grp3.1
+            edts.Add(JsonConvert.DeserializeObject<Models.Edt>(await client.DownloadStringTaskAsync(GetUriFromCode("4352c5485001785"))));
+            // grp3.2
+            edts.Add(JsonConvert.DeserializeObject<Models.Edt>(await client.DownloadStringTaskAsync(GetUriFromCode("1c57595e2401824"))));
 
-                Uri GetUriFromCode(string id) => new Uri("http://wildgoat.fr/api/ical-json.php?url=" + System.Web.HttpUtility.UrlEncode("https://dptinfo.iutmetz.univ-lorraine.fr/lna/agendas/ical.php?ical=" + id) + "&week=1"); ;
-            }
+            static Uri GetUriFromCode(string id) => new Uri("http://wildgoat.fr/api/ical-json.php?url=" + System.Web.HttpUtility.UrlEncode("https://dptinfo.iutmetz.univ-lorraine.fr/lna/agendas/ical.php?ical=" + id) + "&week=1");
         }
 
         public static void Main(string[] args) => new Program().MainAsync().GetAwaiter().GetResult();
@@ -55,9 +53,10 @@ namespace Assembly_Bot
             {
                 await Log(new LogMessage(LogSeverity.Info, "Ready", $"Connected as {_client.CurrentUser} on {_client.Guilds.Count} servers"));
 
-                var fields = new List<EmbedFieldBuilder>();
-                fields.Add(new EmbedFieldBuilder() { Name = "Launch platform", Value = Environment.OSVersion + "\nat " + DateTime.Now.ToString("HH:mm:ss") });
-                await LogOnDiscord("Hello world", "I've just awoken my master !", Color.Green, fields).ConfigureAwait(true);
+                await LogOnDiscord("Hello world", "I've just awoken my master !", Color.Green, new List<EmbedFieldBuilder>
+                {
+                    new EmbedFieldBuilder() { Name = "Launch platform", Value = Environment.OSVersion + "\nat " + DateTime.Now.ToString("HH:mm:ss") }
+                }).ConfigureAwait(true);
             };
 
             await _client.LoginAsync(TokenType.Bot, File.ReadLines("token.txt").First());
@@ -93,7 +92,10 @@ namespace Assembly_Bot
         public async void AlertStudents(object sender, System.Timers.ElapsedEventArgs e)
         {
             if (_lastUpdate <= DateTime.Now.AddHours(2))
+            {
+                _lastUpdate = DateTime.Now;
                 await ReloadEdt();
+            }
             foreach (var edt in edts)
                 if (edt.Weeks[0].Days.Count >= (int)DateTime.Today.DayOfWeek)
                 {
