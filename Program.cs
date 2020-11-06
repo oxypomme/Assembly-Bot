@@ -92,7 +92,7 @@ namespace Assembly_Bot
             await Task.Delay(-1);
         }
 
-        private (bool falert, bool salert) _isAlreadyAlerted;
+        private (bool falert, bool salert) _isAlreadyAlerted = (false, false);
 
         public async void AlertStudents(object sender, System.Timers.ElapsedEventArgs e)
         {
