@@ -10,14 +10,15 @@ using System.Threading.Tasks;
 namespace Assembly_Bot.Modules
 {
     [Group("admin")]
+    [Summary("Admin Commands")]
     [RequireUserPermission(GuildPermission.Administrator)]
     public class AdminModule : ModuleBase<SocketCommandContext>
     {
         [Command("clean", RunMode = RunMode.Async)]
         [Alias("cleans", "clear", "clears")]
-        [Summary("Cleans the specified amount of messages in the channel. Default 100.")]
+        [Summary("Cleans the specified amount of messages in the channel.")]
         [RequireBotPermission(ChannelPermission.ManageMessages)]
-        public async Task CleanAsync(int count = 100)
+        public async Task CleanAsync([Summary("Default 100")] int count = 100)
         {
             await Context.Message.DeleteAsync();
             await ChatUtils.CleanChannel(Context.Channel, count);
@@ -29,9 +30,9 @@ namespace Assembly_Bot.Modules
         }
 
         [Command("mutev", RunMode = RunMode.Async)]
-        [Summary("Mute a whole voice chat for specified duration. Default yours, and for 1 min.")]
+        [Summary("Mute a whole voice chat for a specified duration.")]
         [RequireBotPermission(GuildPermission.ManageRoles)]
-        public async Task MuteVoiceAsync(ulong vid = 0, int secs = 60)
+        public async Task MuteVoiceAsync([Summary("The id of the voice channel. Default it's yours")] ulong vid = 0, [Summary("The duration of the mute. Default 1 min")] int secs = 60)
         {
             SocketVoiceChannel channel = Context.Guild.GetVoiceChannel(vid);
             if (vid == 0)
@@ -61,8 +62,8 @@ namespace Assembly_Bot.Modules
         }
 
         [Command("activity")]
-        [Summary("Set the bot's activity. Default : Playing. See doc about `ActivityType` for ids.")]
-        public async Task SetActivity(string activity, int type = 0)
+        [Summary("Set the bot's activity.")]
+        public async Task SetActivity(string activity, [Summary("Default : Playing. See doc about `ActivityType` for ids.")] int type = 0)
         {
             await Context.Client.SetGameAsync(activity, type: (ActivityType)type);
             await Context.Channel.SendMessageAsync("Activity updated");

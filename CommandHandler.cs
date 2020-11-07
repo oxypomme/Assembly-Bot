@@ -14,7 +14,7 @@ namespace Assembly_Bot
         private readonly CommandService _commands;
         private readonly IServiceProvider _services;
 
-        private const string _prefix = "!";
+        public const string prefix = ",";
 
         public CommandHandler(IServiceProvider services)
         {
@@ -35,7 +35,7 @@ namespace Assembly_Bot
             var message = messageParam as SocketUserMessage;
 
             int argPos = 0;
-            if (!(message.HasStringPrefix(_prefix, ref argPos)))
+            if (!(message.HasStringPrefix(prefix, ref argPos)))
                 return;
 
             var context = new SocketCommandContext(_client, message);

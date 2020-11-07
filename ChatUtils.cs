@@ -42,7 +42,7 @@ namespace Assembly_Bot
                 Description = message,
                 Timestamp = DateTimeOffset.Now,
                 Color = color,
-                Footer = new EmbedFooterBuilder() { Text = "by OxyTom#1831" }
+                Footer = new EmbedFooterBuilder() { Text = "by OxyTom#1831", IconUrl = "https://avatars3.githubusercontent.com/u/34627360?u=2e1dd6031fa2703dfd3f16700c978c85559e2e5f" }
             }.WithAuthor(Program.services.GetRequiredService<DiscordSocketClient>().CurrentUser);
             if (fields != null)
                 foreach (var field in fields)

@@ -50,11 +50,13 @@ namespace Assembly_Bot
                 // Log that we're ready
                 await Log(new LogMessage(LogSeverity.Info, "Ready", $"Connected as {_client.CurrentUser} on {_client.Guilds.Count} servers"));
 
+#if !DEBUG
                 // Bypass the condition in previous statement
                 await LogOnDiscord("Hello world", "I've just awoken my master !", Color.Green, new List<EmbedFieldBuilder>
                 {
                     new EmbedFieldBuilder() { Name = "Launch platform", Value = Environment.OSVersion + "\nat " + DateTime.Now.ToString("HH:mm:ss") }
                 }).ConfigureAwait(true);
+#endif
             };
 
             // Setup and starting the bot
@@ -114,7 +116,6 @@ namespace Assembly_Bot
 
                     // Download the JSON in a specified delay
                     if (await Task.WhenAny(task, Task.Delay(Timeout)) == task)
-                    {
                         try
                         {
                             var json = task.Result;
@@ -150,7 +151,6 @@ namespace Assembly_Bot
                             }
                         }
                         catch (Exception e) { await Log(new LogMessage(LogSeverity.Error, "ReloadEdt", e.GetType().Name, e)); }
-                    }
                     else
                         throw new TimeoutException("Can't get distant JSON");
                 }
