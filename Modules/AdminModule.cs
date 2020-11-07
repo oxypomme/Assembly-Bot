@@ -57,5 +57,9 @@ namespace Assembly_Bot.Modules
             await Task.Delay(delay);
             await msg.DeleteAsync();
         }
+
+        [Command("activity")]
+        [Summary("Set the bot's activity. Default : Playing. See doc about `ActivityType` for ids.")]
+        public async Task SetActivity(string activity, int type = 0) => await Context.Client.SetGameAsync(activity, type: (ActivityType)type);
     }
 }

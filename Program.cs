@@ -64,9 +64,9 @@ namespace Assembly_Bot
 
             // Just fooling around with activity
 #if DEBUG
-            await _client.SetGameAsync("laboratoire", type: ActivityType.Playing).ConfigureAwait(true);
+            await _client.SetGameAsync("laboratoire", type: ActivityType.Playing);
 #else
-            await _client.SetGameAsync("le prochain cours", type: ActivityType.Listening).ConfigureAwait(true);
+            await _client.SetGameAsync("Sbotify", type: ActivityType.Listening);
 #endif
 
             // Setup some events
@@ -111,7 +111,7 @@ namespace Assembly_Bot
                 {
                     var json = task.Result;
 
-                    if (edts[i].RawJsonCode == 0 || json.GetHashCode(StringComparison.OrdinalIgnoreCase) != edts[i].RawJsonCode)
+                    if (edts[i].RawJsonCode == 0 || json.GetHashCode(StringComparison.OrdinalIgnoreCase) != edts[i].RawJsonCode || DateTime.Today.DayOfWeek == DayOfWeek.Monday)
                     {
                         // Download the table
                         await client.DownloadFileTaskAsync(GetIMGUriFromCode(edtCodes[i]), edtCodes[i] + ".png");
@@ -139,7 +139,7 @@ namespace Assembly_Bot
                     }
                 }
                 else
-                    await Log(new LogMessage(LogSeverity.Error, "EDT", "Can't get distant JSON"));
+                    throw new FileNotFoundException("Can't get distant JSON");
             }));
 
             static Uri GetJSONUriFromCode(string id) => new Uri("http://wildgoat.fr/api/ical-json.php?url=" + System.Web.HttpUtility.UrlEncode("https://dptinfo.iutmetz.univ-lorraine.fr/lna/agendas/ical.php?ical=" + id) + "&week=1");
