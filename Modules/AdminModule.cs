@@ -14,11 +14,13 @@ namespace Assembly_Bot.Modules
     public class AdminModule : ModuleBase<SocketCommandContext>
     {
         [Command("clean", RunMode = RunMode.Async)]
+        [Alias("cleans", "clear", "clears")]
         [Summary("Cleans the specified amount of messages in the channel. Default 100.")]
         [RequireBotPermission(ChannelPermission.ManageMessages)]
-        public async Task CleanAsync(int count = 99)
+        public async Task CleanAsync(int count = 100)
         {
-            await ChatUtils.CleanChannel(Context.Channel, count + 1);
+            await Context.Message.DeleteAsync();
+            await ChatUtils.CleanChannel(Context.Channel, count);
 
             const int delay = 5000;
             var msg = await ReplyAsync($"Purge completed. _This message will be deleted in {delay / 1000} seconds._");
@@ -60,6 +62,10 @@ namespace Assembly_Bot.Modules
 
         [Command("activity")]
         [Summary("Set the bot's activity. Default : Playing. See doc about `ActivityType` for ids.")]
-        public async Task SetActivity(string activity, int type = 0) => await Context.Client.SetGameAsync(activity, type: (ActivityType)type);
+        public async Task SetActivity(string activity, int type = 0)
+        {
+            await Context.Client.SetGameAsync(activity, type: (ActivityType)type);
+            await Context.Channel.SendMessageAsync("Activity updated");
+        }
     }
 }
