@@ -14,7 +14,7 @@ namespace Assembly_Bot.Models
         public string Success { get; set; }
 
         [JsonIgnore]
-        public string RawJson { get; set; }
+        public int RawJsonCode { get; set; }
     }
 
     public class Week
