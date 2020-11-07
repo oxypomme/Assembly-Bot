@@ -119,10 +119,13 @@ namespace Assembly_Bot
                         {
                             var json = task.Result;
 
-                            if (edts[i].RawJsonCode == 0 || json.GetHashCode(StringComparison.OrdinalIgnoreCase) != edts[i].RawJsonCode || DateTime.Today.DayOfWeek == DayOfWeek.Monday)
+                            if (edts[i].RawJsonCode == 0 || json.GetHashCode(StringComparison.OrdinalIgnoreCase) != edts[i].RawJsonCode)
                             {
                                 // Download the table
-                                await client.DownloadFileTaskAsync(GetIMGUriFromCode(edtCodes[i]), edtCodes[i] + ".png");
+                                int offset = 0;
+                                if (DateTime.Today.DayOfWeek == DayOfWeek.Sunday)
+                                    offset = 1;
+                                await client.DownloadFileTaskAsync(GetIMGUriFromCode(edtCodes[i], offset), edtCodes[i] + ".png");
 
                                 // Send it to the correct channel
 #if DEBUG
@@ -137,7 +140,7 @@ namespace Assembly_Bot
                                         new EmbedBuilder()
                                         {
                                             Title = "Groupe 3." + (i + 1),
-                                            Description = $"Semaine du {DateTime.Today.StartOfWeek(DayOfWeek.Monday):dd/MM} au {DateTime.Today.EndOfWeek(DayOfWeek.Monday):dd/MM}",
+                                            Description = $"Semaine du {DateTime.Today.AddDays(offset * 7).StartOfWeek(DayOfWeek.Monday):dd/MM} au {DateTime.Today.AddDays(offset * 7).EndOfWeek(DayOfWeek.Monday):dd/MM}",
                                             ImageUrl = $"attachment://{edtCodes[i]}.png"
                                         }
                                     )
@@ -155,7 +158,7 @@ namespace Assembly_Bot
             }));
 
             static Uri GetJSONUriFromCode(string id) => new Uri("http://wildgoat.fr/api/ical-json.php?url=" + System.Web.HttpUtility.UrlEncode("https://dptinfo.iutmetz.univ-lorraine.fr/lna/agendas/ical.php?ical=" + id) + "&week=1");
-            static Uri GetIMGUriFromCode(string id) => new Uri("http://wildgoat.fr/api/ical-png.php?url=" + System.Web.HttpUtility.UrlEncode("https://dptinfo.iutmetz.univ-lorraine.fr/lna/agendas/ical.php?ical=" + id) + "&regex=" + Uri.EscapeDataString("/^(.*) - .* - .* - .*$/"));
+            static Uri GetIMGUriFromCode(string id, int offset = 0) => new Uri("http://wildgoat.fr/api/ical-png.php?url=" + System.Web.HttpUtility.UrlEncode("https://dptinfo.iutmetz.univ-lorraine.fr/lna/agendas/ical.php?ical=" + id) + "&regex=" + Uri.EscapeDataString("/^(.*) - .* - .* - .*$/") + "&offset=" + offset);
         }
 
         private (bool falert, bool salert) _isAlreadyAlerted = (false, false);
