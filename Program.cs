@@ -60,7 +60,11 @@ namespace Assembly_Bot
             // Setup and starting the bot
             await _client.LoginAsync(TokenType.Bot, File.ReadLines("token.txt").First());
             await _client.StartAsync();
-            await services.GetRequiredService<CommandHandler>().InstallCommandsAsync();
+            try
+            {
+                await services.GetRequiredService<CommandHandler>().InstallCommandsAsync();
+            }
+            catch (Exception e) { await Log(new LogMessage(LogSeverity.Error, "InstallCommands", e.GetType().Name, e)); }
 
             // Just fooling around with activity
 #if DEBUG
@@ -99,47 +103,55 @@ namespace Assembly_Bot
         {
             await Task.WhenAll(edtCodes.Select(async (codes, i) =>
             {
-                while (edts.Count < edtCodes.Length) // If the timetable doesn't exist
-                    edts.Add(new Edt());
-
-                // Setup a new WebClient for each task
-                using var client = new WebClient();
-                var task = client.DownloadStringTaskAsync(GetJSONUriFromCode(codes));
-
-                // Download the JSON in a specified delay
-                if (await Task.WhenAny(task, Task.Delay(Timeout)) == task)
+                try
                 {
-                    var json = task.Result;
+                    while (edts.Count < edtCodes.Length) // If the timetable doesn't exist
+                        edts.Add(new Edt());
 
-                    if (edts[i].RawJsonCode == 0 || json.GetHashCode(StringComparison.OrdinalIgnoreCase) != edts[i].RawJsonCode || DateTime.Today.DayOfWeek == DayOfWeek.Monday)
+                    // Setup a new WebClient for each task
+                    using var client = new WebClient();
+                    var task = client.DownloadStringTaskAsync(GetJSONUriFromCode(codes));
+
+                    // Download the JSON in a specified delay
+                    if (await Task.WhenAny(task, Task.Delay(Timeout)) == task)
                     {
-                        // Download the table
-                        await client.DownloadFileTaskAsync(GetIMGUriFromCode(edtCodes[i]), edtCodes[i] + ".png");
+                        try
+                        {
+                            var json = task.Result;
 
-                        // Send it to the correct channel
+                            if (edts[i].RawJsonCode == 0 || json.GetHashCode(StringComparison.OrdinalIgnoreCase) != edts[i].RawJsonCode || DateTime.Today.DayOfWeek == DayOfWeek.Monday)
+                            {
+                                // Download the table
+                                await client.DownloadFileTaskAsync(GetIMGUriFromCode(edtCodes[i]), edtCodes[i] + ".png");
+
+                                // Send it to the correct channel
 #if DEBUG
-                        await Sandbox.main
+                                await Sandbox.main
 #else
-                        await ChatUtils.CleanChannel(Apsu.edts[i], 1);
-                        await Apsu.edts[i]
+                                await ChatUtils.CleanChannel(Apsu.edts[i], 1);
+                                await Apsu.edts[i]
 #endif
-                        .SendFileAsync(
-                            edtCodes[i] + ".png", "",
-                            embed: ChatUtils.CreateEmbed(
-                                new EmbedBuilder()
-                                {
-                                    Title = "Groupe 3." + (i + 1),
-                                    Description = $"Semaine du {DateTime.Today.StartOfWeek(DayOfWeek.Monday):dd/MM} au {DateTime.Today.EndOfWeek(DayOfWeek.Monday):dd/MM}",
-                                    ImageUrl = $"attachment://{edtCodes[i]}.png"
-                                }
-                            )
-                        );
-                        edts[i] = JsonConvert.DeserializeObject<Edt>(json);
-                        edts[i].RawJsonCode = json.GetHashCode(StringComparison.OrdinalIgnoreCase);
+                                .SendFileAsync(
+                                    edtCodes[i] + ".png", "",
+                                    embed: ChatUtils.CreateEmbed(
+                                        new EmbedBuilder()
+                                        {
+                                            Title = "Groupe 3." + (i + 1),
+                                            Description = $"Semaine du {DateTime.Today.StartOfWeek(DayOfWeek.Monday):dd/MM} au {DateTime.Today.EndOfWeek(DayOfWeek.Monday):dd/MM}",
+                                            ImageUrl = $"attachment://{edtCodes[i]}.png"
+                                        }
+                                    )
+                                );
+                                edts[i] = JsonConvert.DeserializeObject<Edt>(json);
+                                edts[i].RawJsonCode = json.GetHashCode(StringComparison.OrdinalIgnoreCase);
+                            }
+                        }
+                        catch (Exception e) { await Log(new LogMessage(LogSeverity.Error, "ReloadEdt", e.GetType().Name, e)); }
                     }
+                    else
+                        throw new TimeoutException("Can't get distant JSON");
                 }
-                else
-                    throw new FileNotFoundException("Can't get distant JSON");
+                catch (Exception e) { await Log(new LogMessage(LogSeverity.Error, "ReloadEdt", e.GetType().Name, e)); }
             }));
 
             static Uri GetJSONUriFromCode(string id) => new Uri("http://wildgoat.fr/api/ical-json.php?url=" + System.Web.HttpUtility.UrlEncode("https://dptinfo.iutmetz.univ-lorraine.fr/lna/agendas/ical.php?ical=" + id) + "&week=1");
@@ -153,28 +165,30 @@ namespace Assembly_Bot
         {
             Task.Run(async () =>
             {
-                if (_lastUpdate <= DateTime.Now.AddHours(2))
+                try
                 {
-                    _lastUpdate = DateTime.Now;
-                    await ReloadEdt();
-                }
-                foreach (var edt in edts) //TODO: Tasks ?
-                {
-                    if (edt.Weeks[0].Days.Count >= (int)DateTime.Today.DayOfWeek)
+                    if (_lastUpdate <= DateTime.Now.AddHours(2))
                     {
-                        var day = edt.Weeks[0].Days[(int)DateTime.Today.DayOfWeek - 1];
-                        SocketTextChannel channel;
-#if DEBUG
-                        channel = Sandbox.main;
-#endif
-                        foreach (var evnt in day.Events) //TODO: Tasks ?
+                        _lastUpdate = DateTime.Now;
+                        await ReloadEdt();
+                    }
+                    foreach (var edt in edts) //TODO: Tasks ?
+                    {
+                        if (edt.Weeks[0].Days.Count >= (int)DateTime.Today.DayOfWeek)
                         {
-                            var timeLeft = evnt.Dtstart.Subtract(DateTime.Now);
-                            if (timeLeft.Hours == 0 && timeLeft.Minutes <= 15 && !(_isAlreadyAlerted.falert && _isAlreadyAlerted.salert))
-                            {
-                                var eventSplitted = evnt.Summary.Split(" - ");
-                                // Mat - Group - Room - Type
+                            var day = edt.Weeks[0].Days[(int)DateTime.Today.DayOfWeek - 1];
+                            SocketTextChannel channel;
 #if DEBUG
+                            channel = Sandbox.main;
+#endif
+                            foreach (var evnt in day.Events) //TODO: Tasks ?
+                            {
+                                var timeLeft = evnt.Dtstart.Subtract(DateTime.Now);
+                                if (timeLeft.Hours == 0 && timeLeft.Minutes <= 15 && !(_isAlreadyAlerted.falert && _isAlreadyAlerted.salert))
+                                {
+                                    var eventSplitted = evnt.Summary.Split(" - ");
+                                    // Mat - Group - Room - Type
+#if !DEBUG
                                 if (eventSplitted[1].EndsWith("grp3.1"))
                                     channel = Apsu.infos[1];
                                 else if (eventSplitted[1].EndsWith("grp3.2"))
@@ -182,25 +196,27 @@ namespace Assembly_Bot
                                 else
                                     channel = Apsu.infos[0];
 #endif
-                                if (timeLeft.Minutes == 15 && !_isAlreadyAlerted.falert)
-                                {
-                                    await ChatUtils.PingMessage(channel, $"{eventSplitted[0]} dans 15 minutes.");
-                                    _isAlreadyAlerted.falert = true;
+                                    if (timeLeft.Minutes == 15 && !_isAlreadyAlerted.falert)
+                                    {
+                                        await ChatUtils.PingMessage(channel, $"{eventSplitted[0]} dans 15 minutes.");
+                                        _isAlreadyAlerted.falert = true;
+                                    }
+                                    else if (timeLeft.Minutes == 5 && !_isAlreadyAlerted.salert)
+                                    {
+                                        await ChatUtils.PingMessage(channel, $"{eventSplitted[0]} dans 5 minutes.", channel.Guild.EveryoneRole);
+                                        _isAlreadyAlerted.salert = true;
+                                    }
                                 }
-                                else if (timeLeft.Minutes == 5 && !_isAlreadyAlerted.salert)
+                                else if ((timeLeft.Hours != 0 || timeLeft.Minutes != 10) && _isAlreadyAlerted.falert && _isAlreadyAlerted.salert)
                                 {
-                                    await ChatUtils.PingMessage(channel, $"{eventSplitted[0]} dans 5 minutes.", channel.Guild.EveryoneRole);
-                                    _isAlreadyAlerted.salert = true;
+                                    _isAlreadyAlerted.falert = false;
+                                    _isAlreadyAlerted.salert = false;
                                 }
-                            }
-                            else if ((timeLeft.Hours != 0 || timeLeft.Minutes != 10) && _isAlreadyAlerted.falert && _isAlreadyAlerted.salert)
-                            {
-                                _isAlreadyAlerted.falert = false;
-                                _isAlreadyAlerted.salert = false;
                             }
                         }
                     }
                 }
+                catch (Exception e) { await Log(new LogMessage(LogSeverity.Error, "AlertStudents", e.GetType().Name, e)); }
             });
         }
 
@@ -239,8 +255,17 @@ namespace Assembly_Bot
 
         private async Task LogOnDiscord(string title, string message, Color color, List<EmbedFieldBuilder> fields = null, bool isImportant = false)
         {
-            string mention = (isImportant && Sandbox.server.Owner != null ? Sandbox.server.Owner.Mention : "");
-            await Sandbox.log.SendMessageAsync(mention, embed: ChatUtils.CreateEmbed(title, message, color, fields)).ConfigureAwait(true);
+            try
+            {
+                string mention = (isImportant && Sandbox.server.Owner != null ? Sandbox.server.Owner.Mention : "");
+                await Sandbox.log.SendMessageAsync(mention, embed: ChatUtils.CreateEmbed(title, message, color, fields)).ConfigureAwait(true);
+            }
+            catch (Exception e)
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine($"{DateTime.Now,-19} [Error] DiscordLogger: {e.GetType().Name} {e}");
+                Console.ResetColor();
+            }
         }
     }
 }
