@@ -10,15 +10,18 @@ using System.Threading.Tasks;
 namespace Assembly_Bot.Modules
 {
     [Group("admin")]
+    [Summary("Admin Commands")]
     [RequireUserPermission(GuildPermission.Administrator)]
     public class AdminModule : ModuleBase<SocketCommandContext>
     {
         [Command("clean", RunMode = RunMode.Async)]
-        [Summary("Cleans the specified amount of messages in the channel. Default 100.")]
+        [Alias("cleans", "clear", "clears")]
+        [Summary("Cleans the specified amount of messages in the channel.")]
         [RequireBotPermission(ChannelPermission.ManageMessages)]
-        public async Task CleanAsync(int count = 99)
+        public async Task CleanAsync([Summary("Default 100")] int count = 100)
         {
-            await ChatUtils.CleanChannel(Context.Channel, count + 1);
+            await Context.Message.DeleteAsync();
+            await ChatUtils.CleanChannel(Context.Channel, count);
 
             const int delay = 5000;
             var msg = await ReplyAsync($"Purge completed. _This message will be deleted in {delay / 1000} seconds._");
@@ -27,9 +30,9 @@ namespace Assembly_Bot.Modules
         }
 
         [Command("mutev", RunMode = RunMode.Async)]
-        [Summary("Mute a whole voice chat for specified duration. Default yours, and for 1 min.")]
+        [Summary("Mute a whole voice chat for a specified duration.")]
         [RequireBotPermission(GuildPermission.ManageRoles)]
-        public async Task MuteVoiceAsync(ulong vid = 0, int secs = 60)
+        public async Task MuteVoiceAsync([Summary("The id of the voice channel. Default it's yours")] ulong vid = 0, [Summary("The duration of the mute. Default 1 min")] int secs = 60)
         {
             SocketVoiceChannel channel = Context.Guild.GetVoiceChannel(vid);
             if (vid == 0)
@@ -56,6 +59,14 @@ namespace Assembly_Bot.Modules
             await msg.ModifyAsync(m => m.Content = $"{channel.Name} is no longer muted. _This message will be deleted in {delay / 1000} seconds._");
             await Task.Delay(delay);
             await msg.DeleteAsync();
+        }
+
+        [Command("activity")]
+        [Summary("Set the bot's activity.")]
+        public async Task SetActivity(string activity, [Summary("Default : Playing. See doc about `ActivityType` for ids.")] int type = 0)
+        {
+            await Context.Client.SetGameAsync(activity, type: (ActivityType)type);
+            await Context.Channel.SendMessageAsync("Activity updated");
         }
     }
 }

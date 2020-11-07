@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace Assembly_Bot.Modules
 {
+    [Summary("Utils Commands")]
     public class UtilsModule : ModuleBase<SocketCommandContext>
     {
         [Command("ping")]

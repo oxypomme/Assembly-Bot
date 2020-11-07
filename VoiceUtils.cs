@@ -1,4 +1,5 @@
-﻿using Discord;
+﻿using Assembly_Bot.Models;
+using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 using System;
@@ -14,7 +15,7 @@ namespace Assembly_Bot
         public static async Task GroupChatToClean(SocketUser user, SocketVoiceState oldVoiceState, SocketVoiceState newVoiceState)
         {
             if (oldVoiceState.VoiceChannel != null
-                && (oldVoiceState.VoiceChannel.Guild.Id == 773545167117746198 || oldVoiceState.VoiceChannel.Guild.Id == 436909627834368010))
+                && (oldVoiceState.VoiceChannel.Guild.Id == Apsu.server.Id || oldVoiceState.VoiceChannel.Guild.Id == Sandbox.server.Id))
                 // Just activate this functionality on the APSU and my test server
 #if DEBUG
                 if (oldVoiceState.VoiceChannel.Name.StartsWith("VocalABot") && oldVoiceState.VoiceChannel.Users.Count == 0)

@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 namespace Assembly_Bot.Modules
 {
     [Group("debug")]
+    [Summary("Utils Commands")]
     public class DebugModule : ModuleBase<SocketCommandContext>
     {
         [Command("roleinfo")]
