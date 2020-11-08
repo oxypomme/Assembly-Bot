@@ -66,7 +66,7 @@ namespace Assembly_Bot
             {
                 await services.GetRequiredService<CommandHandler>().InstallCommandsAsync();
             }
-            catch (Exception e) { await Log(new LogMessage(LogSeverity.Error, "InstallCommands", e.GetType().Name, e)); }
+            catch (Exception e) { await Log(new LogMessage(LogSeverity.Error, "InstallCommands", e.Message, e)); }
 
             // Just fooling around with activity
 #if DEBUG
@@ -170,14 +170,14 @@ namespace Assembly_Bot
                                 );
                             }
                         }
-                        catch (Exception e) { await Log(new LogMessage(LogSeverity.Error, "ReloadEdt", e.GetType().Name, e)); }
+                        catch (Exception e) { await Log(new LogMessage(LogSeverity.Error, "ReloadEdt", e.Message, e)); }
                     else
                         throw new TimeoutException("Can't get distant JSON");
                     // If today is not a Sunday, allow edts update from Sundays
                     if (DateTime.Today.DayOfWeek != DayOfWeek.Sunday)
                         _edtIsSundayAlreadyPosted = false;
                 }
-                catch (Exception e) { await Log(new LogMessage(LogSeverity.Error, "ReloadEdt", e.GetType().Name, e)); }
+                catch (Exception e) { await Log(new LogMessage(LogSeverity.Error, "ReloadEdt", e.Message, e)); }
             }));
 
             static Uri GetJSONUriFromCode(string id) => new Uri("http://wildgoat.fr/api/ical-json.php?url=" + System.Web.HttpUtility.UrlEncode("https://dptinfo.iutmetz.univ-lorraine.fr/lna/agendas/ical.php?ical=" + id) + "&week=1");
@@ -242,7 +242,7 @@ namespace Assembly_Bot
                         }
                     }
                 }
-                catch (Exception e) { await Log(new LogMessage(LogSeverity.Error, "AlertStudents", e.GetType().Name, e)); }
+                catch (Exception e) { await Log(new LogMessage(LogSeverity.Error, "AlertStudents", e.Message, e)); }
             });
         }
 
@@ -273,7 +273,7 @@ namespace Assembly_Bot
                     Console.ForegroundColor = ConsoleColor.DarkGray;
                     break;
             }
-            Console.WriteLine($"{DateTime.Now,-19} [{message.Severity}] {message.Source}: {message.Message} {message.Exception}");
+            Console.WriteLine($"{DateTime.Now,-19} [{message.Severity}] {message.Source}: {message.Message} {message.Exception.StackTrace}");
             if (_client.ConnectionState == ConnectionState.Connected && message.Severity < LogSeverity.Info)
                 await LogOnDiscord("Something went wrong", "*" + message.Source + "*\n" + message.Message, color, isImportant: isImp).ConfigureAwait(true);
             Console.ResetColor();
