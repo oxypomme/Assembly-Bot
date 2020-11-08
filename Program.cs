@@ -273,7 +273,10 @@ namespace Assembly_Bot
                     Console.ForegroundColor = ConsoleColor.DarkGray;
                     break;
             }
-            Console.WriteLine($"{DateTime.Now,-19} [{message.Severity}] {message.Source}: {message.Message} {message.Exception.StackTrace}");
+            Console.Write($"{DateTime.Now,-19} [{message.Severity}] {message.Source}: {message.Message}");
+            if (message.Exception != null)
+                Console.Write(" " + message.Exception.StackTrace);
+            Console.WriteLine();
             if (_client.ConnectionState == ConnectionState.Connected && message.Severity < LogSeverity.Info)
                 await LogOnDiscord("Something went wrong", "*" + message.Source + "*\n" + message.Message, color, isImportant: isImp).ConfigureAwait(true);
             Console.ResetColor();
