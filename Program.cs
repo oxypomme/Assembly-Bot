@@ -200,20 +200,22 @@ namespace Assembly_Bot
                     }
                     foreach (var edt in edts) //TODO: Tasks ?
                     {
-                        if (edt.Weeks[0].Days.Count >= (int)DateTime.Today.DayOfWeek)
-                        {
-                            var day = edt.Weeks[0].Days[(int)DateTime.Today.DayOfWeek - 1];
-                            SocketTextChannel channel;
+                        Day day; // DayOfWeek.Sunday = 0, or in the JSON, Sunday is the 7th day
+                        if (DateTime.Today.DayOfWeek == DayOfWeek.Sunday)
+                            day = edt.Weeks[0].Days[6]; // Get the real Sunday
+                        else
+                            day = edt.Weeks[0].Days[(int)DateTime.Today.DayOfWeek - 1]; // Get the day
+                        SocketTextChannel channel;
 #if DEBUG
-                            channel = Sandbox.main;
+                        channel = Sandbox.main;
 #endif
-                            foreach (var evnt in day.Events) //TODO: Tasks ?
+                        foreach (var evnt in day.Events) //TODO: Tasks ?
+                        {
+                            var timeLeft = evnt.Dtstart.Subtract(DateTime.Now);
+                            if (timeLeft.Hours == 0 && timeLeft.Minutes <= 15 && !(_isAlreadyAlerted.falert && _isAlreadyAlerted.salert))
                             {
-                                var timeLeft = evnt.Dtstart.Subtract(DateTime.Now);
-                                if (timeLeft.Hours == 0 && timeLeft.Minutes <= 15 && !(_isAlreadyAlerted.falert && _isAlreadyAlerted.salert))
-                                {
-                                    var eventSplitted = evnt.Summary.Split(" - ");
-                                    // Mat - Group - Room - Type
+                                var eventSplitted = evnt.Summary.Split(" - ");
+                                // Mat - Group - Room - Type
 #if !DEBUG
                                     if (eventSplitted[1].EndsWith("grp3.1"))
                                         channel = Apsu.infos[1];
@@ -222,22 +224,21 @@ namespace Assembly_Bot
                                     else
                                         channel = Apsu.infos[0];
 #endif
-                                    if (timeLeft.Minutes == 15 && !_isAlreadyAlerted.falert)
-                                    {
-                                        await ChatUtils.PingMessage(channel, $"{eventSplitted[0]} dans 15 minutes.");
-                                        _isAlreadyAlerted.falert = true;
-                                    }
-                                    else if (timeLeft.Minutes == 5 && !_isAlreadyAlerted.salert)
-                                    {
-                                        await ChatUtils.PingMessage(channel, $"{eventSplitted[0]} dans 5 minutes.", channel.Guild.EveryoneRole);
-                                        _isAlreadyAlerted.salert = true;
-                                    }
-                                }
-                                else if ((timeLeft.Hours != 0 || timeLeft.Minutes != 10) && _isAlreadyAlerted.falert && _isAlreadyAlerted.salert)
+                                if (timeLeft.Minutes == 15 && !_isAlreadyAlerted.falert)
                                 {
-                                    _isAlreadyAlerted.falert = false;
-                                    _isAlreadyAlerted.salert = false;
+                                    await ChatUtils.PingMessage(channel, $"{eventSplitted[0]} dans 15 minutes.");
+                                    _isAlreadyAlerted.falert = true;
                                 }
+                                else if (timeLeft.Minutes == 5 && !_isAlreadyAlerted.salert)
+                                {
+                                    await ChatUtils.PingMessage(channel, $"{eventSplitted[0]} dans 5 minutes.", channel.Guild.EveryoneRole);
+                                    _isAlreadyAlerted.salert = true;
+                                }
+                            }
+                            else if ((timeLeft.Hours != 0 || timeLeft.Minutes != 10) && _isAlreadyAlerted.falert && _isAlreadyAlerted.salert)
+                            {
+                                _isAlreadyAlerted.falert = false;
+                                _isAlreadyAlerted.salert = false;
                             }
                         }
                     }
