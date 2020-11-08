@@ -166,7 +166,7 @@ namespace Assembly_Bot
                                             Description = $"Semaine du {DateTime.Today.AddDays(offset * 7).StartOfWeek(DayOfWeek.Monday):dd/MM} au {DateTime.Today.AddDays(offset * 7).EndOfWeek(DayOfWeek.Monday):dd/MM}.",
                                             Fields = new List<EmbedFieldBuilder>() {
                                                 new EmbedFieldBuilder() { IsInline = true, Name="Généré", Value = "par [Wildgoat#6969](https://github.com/WildGoat07)" },
-                                                new EmbedFieldBuilder() { IsInline = true, Name="avec :hearts:", Value = $"[Lien direct]({GetIMGUriFromCode(edtCodes[i])})" }
+                                                new EmbedFieldBuilder() { IsInline = true, Name="avec :hearts:", Value = $"[Lien direct]({GetIMGUriFromCode(edtCodes[i], offset)})" }
                                             },
                                             ImageUrl = $"attachment://{edtCodes[i]}.png"
                                         }
