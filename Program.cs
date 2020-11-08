@@ -149,8 +149,12 @@ namespace Assembly_Bot
                                 if (_edtMessages[i] != null)
                                     await _edtMessages[i].DeleteAsync();
 #if DEBUG
+                                else
+                                    await ChatUtils.CleanChannel(Sandbox.main, 5);
                                 _edtMessages[i] = await Sandbox.main
 #else
+                                else
+                                    await ChatUtils.CleanChannel(Apsu.edts[i], 5);
                                 _edtMessages[i] = await Apsu.edts[i]
 #endif
                                 .SendFileAsync(
