@@ -21,7 +21,7 @@ namespace Assembly_Bot
         private static RestUserMessage[] _edtMessages = new RestUserMessage[edtCodes.Length];
         private static bool _edtIsSundayAlreadyPosted;
 
-        public static async Task ReloadEdt(bool forceJSON = false, bool forceUP = false)
+        public static async Task ReloadEdt(bool forceJSON = false, bool forceDOWN = false)
         {
             while (edts.Count < edtCodes.Length) // If the timetable doesn't exist
                 edts.Add(new Edt());
@@ -49,7 +49,8 @@ namespace Assembly_Bot
                             }
 
                             int offset = 0;
-                            bool isEdtDownloaded = forceUP || isJsonUpdated || (DateTime.Today.DayOfWeek == DayOfWeek.Sunday && !_edtIsSundayAlreadyPosted);
+                            string imgGeneretadApi = "";
+                            bool isEdtDownloaded = forceDOWN || isJsonUpdated || (DateTime.Today.DayOfWeek == DayOfWeek.Sunday && !_edtIsSundayAlreadyPosted);
                             if (isEdtDownloaded)
                             {
                                 // Download the table
@@ -64,13 +65,12 @@ namespace Assembly_Bot
                                 {
                                     using (Stream httpStream = await imgTask.Result.Content.ReadAsStreamAsync(), imgStream = new FileStream(code + ".png", FileMode.Create, FileAccess.Write))
                                         await httpStream.CopyToAsync(imgStream);
+                                    imgGeneretadApi = imgTask.Result.RequestMessage.RequestUri.ToString();
                                 }
+                            }
 
-                                using var imgClient = new HttpClient(new HttpClientHandler()
-                                {
-                                    AllowAutoRedirect = false
-                                });
-
+                            if (isEdtDownloaded) //TODO: force upload
+                            {
                                 // Send it to the correct channel
                                 if (_edtMessages[i] != null)
                                     await _edtMessages[i].DeleteAsync();
@@ -92,7 +92,7 @@ namespace Assembly_Bot
                                             Description = $"Semaine du {DateTime.Today.AddDays(offset * 7).StartOfWeek(DayOfWeek.Monday):dd/MM} au {DateTime.Today.AddDays(offset * 7).EndOfWeek(DayOfWeek.Monday):dd/MM}.",
                                             Fields = new List<EmbedFieldBuilder>() {
                                                 new EmbedFieldBuilder() { IsInline = true, Name="Généré", Value = "par [Wildgoat#6969](https://github.com/WildGoat07)" },
-                                                new EmbedFieldBuilder() { IsInline = true, Name="avec :hearts:", Value = imgTask.Result.RequestMessage.RequestUri != null ? $"[Lien direct]({imgTask.Result.RequestMessage.RequestUri})" : ":hearts:" }
+                                                new EmbedFieldBuilder() { IsInline = true, Name="avec :hearts:", Value = imgGeneretadApi != "" ? $"[Lien direct]({imgGeneretadApi})" : ":hearts:" }
                                             },
                                             ImageUrl = $"attachment://{code}.png"
                                         }
