@@ -26,7 +26,7 @@ namespace Assembly_Bot
                     await channel.AddPermissionOverwriteAsync(user, new OverwritePermissions(viewChannel: PermValue.Allow));
                 }
 #else
-                if (oldVoiceState.VoiceChannel.Name.StartsWith("Duo") || oldVoiceState.VoiceChannel.Name.StartsWith("Trio") || oldVoiceState.VoiceChannel.Name.StartsWith("Quatuor"))
+                if (newVoiceState.VoiceChannel.Name.StartsWith("Duo") || newVoiceState.VoiceChannel.Name.StartsWith("Trio") || newVoiceState.VoiceChannel.Name.StartsWith("Quatuor"))
                 {
                     var channel = newVoiceState.VoiceChannel.Guild.TextChannels.First(chan => chan.Name == newVoiceState.VoiceChannel.Name.ToLower());
                     await channel.AddPermissionOverwriteAsync(user, new OverwritePermissions(viewChannel: PermValue.Allow));
