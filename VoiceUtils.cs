@@ -2,6 +2,7 @@
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
+using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,7 +18,7 @@ namespace Assembly_Bot
             if (oldVoiceState.VoiceChannel != null
                 && (oldVoiceState.VoiceChannel.Guild.Id == Apsu.server.Id || oldVoiceState.VoiceChannel.Guild.Id == Sandbox.server.Id))
                 // Just activate this functionality on the APSU and my test server
-#if DEBUG
+#if !DEBUG
                 if (oldVoiceState.VoiceChannel.Name.StartsWith("VocalABot") && oldVoiceState.VoiceChannel.Users.Count == 0)
                 {
                     var channel = oldVoiceState.VoiceChannel.Guild.TextChannels.First(chan => chan.Name.EndsWith("assembly_bot"));
@@ -27,7 +28,10 @@ namespace Assembly_Bot
                 if ((oldVoiceState.VoiceChannel.Name.StartsWith("Duo") || oldVoiceState.VoiceChannel.Name.StartsWith("Trio") || oldVoiceState.VoiceChannel.Name.StartsWith("Quatuor")) && oldVoiceState.VoiceChannel.Users.Count == 0)
                 {
                     var channel = oldVoiceState.VoiceChannel.Guild.TextChannels.First(chan => chan.Name == oldVoiceState.VoiceChannel.Name.ToLower());
-                    await ChatUtils.CleanChannel(channel, 100);
+                    do
+                    {
+                        await ChatUtils.CleanChannel(channel, 100);
+                    } while (await channel.GetMessageAsync(1) != null);
                 }
 #endif
         }
