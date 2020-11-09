@@ -15,25 +15,44 @@ namespace Assembly_Bot
     {
         public static async Task GroupChatToClean(SocketUser user, SocketVoiceState oldVoiceState, SocketVoiceState newVoiceState)
         {
-            if (oldVoiceState.VoiceChannel != null
-                && (oldVoiceState.VoiceChannel.Guild.Id == Apsu.server.Id || oldVoiceState.VoiceChannel.Guild.Id == Sandbox.server.Id))
-                // Just activate this functionality on the APSU and my test server
-#if !DEBUG
-                if (oldVoiceState.VoiceChannel.Name.StartsWith("VocalABot") && oldVoiceState.VoiceChannel.Users.Count == 0)
+            if (newVoiceState.VoiceChannel != null
+                && (newVoiceState.VoiceChannel.Guild.Id == Apsu.server.Id || newVoiceState.VoiceChannel.Guild.Id == Sandbox.server.Id))
+            // Just activate this functionality on the APSU and my test server
+            {
+#if DEBUG
+                if (newVoiceState.VoiceChannel.Name.StartsWith("VocalABot"))
                 {
-                    var channel = oldVoiceState.VoiceChannel.Guild.TextChannels.First(chan => chan.Name.EndsWith("assembly_bot"));
-                    await ChatUtils.CleanChannel(channel, 1);
+                    var channel = newVoiceState.VoiceChannel.Guild.TextChannels.First(chan => chan.Name == newVoiceState.VoiceChannel.Name.ToLower());
+                    await channel.AddPermissionOverwriteAsync(user, new OverwritePermissions(viewChannel: PermValue.Allow));
                 }
 #else
-                if ((oldVoiceState.VoiceChannel.Name.StartsWith("Duo") || oldVoiceState.VoiceChannel.Name.StartsWith("Trio") || oldVoiceState.VoiceChannel.Name.StartsWith("Quatuor")) && oldVoiceState.VoiceChannel.Users.Count == 0)
+#endif
+            }
+            if (oldVoiceState.VoiceChannel != null
+                && (oldVoiceState.VoiceChannel.Guild.Id == Apsu.server.Id || oldVoiceState.VoiceChannel.Guild.Id == Sandbox.server.Id))
+            // Just activate this functionality on the APSU and my test server
+            {
+#if DEBUG
+                if (oldVoiceState.VoiceChannel.Name.StartsWith("VocalABot") && oldVoiceState.VoiceChannel.Users.Count == 0)
                 {
                     var channel = oldVoiceState.VoiceChannel.Guild.TextChannels.First(chan => chan.Name == oldVoiceState.VoiceChannel.Name.ToLower());
-                    do
+                    await channel.RemovePermissionOverwriteAsync(user);
+                    while (await channel.GetMessagesAsync(1).FlattenAsync() != null)
                     {
-                        await ChatUtils.CleanChannel(channel, 100);
-                    } while (await channel.GetMessageAsync(1) != null);
+                        await ChatUtils.CleanChannel(channel, 1);
+                    }
                 }
+#else
+                    if ((oldVoiceState.VoiceChannel.Name.StartsWith("Duo") || oldVoiceState.VoiceChannel.Name.StartsWith("Trio") || oldVoiceState.VoiceChannel.Name.StartsWith("Quatuor")) && oldVoiceState.VoiceChannel.Users.Count == 0)
+                    {
+                        var channel = oldVoiceState.VoiceChannel.Guild.TextChannels.First(chan => chan.Name == oldVoiceState.VoiceChannel.Name.ToLower());
+                       while (await channel.GetMessageAsync(1) != null)
+                       {
+                            await ChatUtils.CleanChannel(channel, 100);
+                       }
+                    }
 #endif
+            }
         }
     }
 }
