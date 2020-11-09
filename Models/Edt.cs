@@ -55,7 +55,7 @@ namespace Assembly_Bot.Models
             {
                 return DateTime.ParseExact(dtend, "yyyyMMddTHHmmss", null);
             }
-            set => dtstart = value.ToString("yyyyMMddTHHmmss");
+            set => dtend = value.ToString("yyyyMMddTHHmmss");
         }
 
         [JsonPropertyName("location")]
