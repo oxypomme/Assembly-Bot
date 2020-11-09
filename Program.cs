@@ -18,6 +18,7 @@ namespace Assembly_Bot
     public class Program
     {
         public static readonly TimeSpan Timeout = TimeSpan.FromSeconds(15);
+        public static ServiceProvider services;
 
         private DiscordSocketClient _client;
         private Logs _loggger;
@@ -37,7 +38,7 @@ namespace Assembly_Bot
             try
             {
                 // Setup services
-                using var services = new ServiceCollection()
+                services = new ServiceCollection()
                     .AddSingleton<DiscordSocketClient>()
                     .AddSingleton<CommandService>()
                     .AddSingleton<CommandHandler>()
