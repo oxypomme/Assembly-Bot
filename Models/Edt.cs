@@ -34,28 +34,28 @@ namespace Assembly_Bot.Models
         [JsonPropertyName("summary")]
         public string Summary { get; set; }
 
-        public List<object> dtstart;
+        public string dtstart;
 
         [JsonIgnore]
         public DateTime Dtstart
         {
             get
             {
-                return DateTime.ParseExact((string)dtstart[0], "yyyyMMddTHHmmss", null);
+                return DateTime.ParseExact(dtstart, "yyyyMMddTHHmmss", null);
             }
-            set => dtstart[0] = value.ToString();
+            set => dtstart = value.ToString("yyyyMMddTHHmmss");
         }
 
-        public List<object> dtend;
+        public string dtend;
 
         [JsonIgnore]
         public DateTime Dtend
         {
             get
             {
-                return DateTime.ParseExact((string)dtend[0], "yyyyMMddTHHmmss", null);
+                return DateTime.ParseExact(dtend, "yyyyMMddTHHmmss", null);
             }
-            set => dtstart[0] = value.ToString();
+            set => dtend = value.ToString("yyyyMMddTHHmmss");
         }
 
         [JsonPropertyName("location")]
