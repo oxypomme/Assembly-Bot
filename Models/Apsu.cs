@@ -17,9 +17,9 @@ namespace Assembly_Bot.Models
             server = Program.services.GetRequiredService<DiscordSocketClient>().GetGuild(773545167117746198);
             infos = new List<SocketTextChannel>()
             {
+                server.GetTextChannel(773546790090833920),
                 server.GetTextChannel(773546828947259443),
-                server.GetTextChannel(773546852183310337),
-                server.GetTextChannel(773546790090833920)
+                server.GetTextChannel(773546852183310337)
             };
             edts = new List<SocketTextChannel>()
             {
