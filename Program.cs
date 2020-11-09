@@ -32,6 +32,8 @@ namespace Assembly_Bot
         // Starting the program in async
         public static void Main(string[] args) => new Program().MainAsync().GetAwaiter().GetResult();
 
+        private bool _isFirstTimeReady = true;
+
         public async Task MainAsync()
         {
             // Setup services
@@ -50,12 +52,14 @@ namespace Assembly_Bot
                 // Log that we're ready
                 await Log(new LogMessage(LogSeverity.Info, "Ready", $"Connected as {_client.CurrentUser} on {_client.Guilds.Count} servers"));
 
-#if !DEBUG
-                // Bypass the condition in previous statement
-                await LogOnDiscord("Hello world", "I've just awoken my master !", Color.Green, new List<EmbedFieldBuilder>
-                {
-                    new EmbedFieldBuilder() { Name = "Launch platform", Value = Environment.OSVersion + "\nat " + DateTime.Now.ToString("HH:mm:ss") }
-                }).ConfigureAwait(true);
+#if DEBUG
+                if (_isFirstTimeReady)
+                    // Bypass the condition in previous statement
+                    await LogOnDiscord("Hello world", "I've just awoken my master !", Color.Green, new List<EmbedFieldBuilder>
+                    {
+                        new EmbedFieldBuilder() { Name = "Launch platform", Value = Environment.OSVersion + "\nat " + DateTime.Now.ToString("HH:mm:ss") }
+                    }).ConfigureAwait(true);
+                _isFirstTimeReady = false;
 #endif
             };
 
