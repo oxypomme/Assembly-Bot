@@ -15,7 +15,7 @@ namespace Assembly_Bot.Modules
         [RequireBotPermission(ChannelPermission.SendMessages)]
         public async Task ForceEdtUpdate()
         {
-            await EdtUtils.ReloadEdt(true);
+            await Edt.ReloadEdt(true);
         }
     }
 }

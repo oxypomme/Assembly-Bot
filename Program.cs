@@ -17,11 +17,10 @@ namespace Assembly_Bot
 {
     public class Program
     {
-        public static ServiceProvider services;
-
         public static readonly TimeSpan Timeout = TimeSpan.FromSeconds(15);
 
         private DiscordSocketClient _client;
+        private Logs _loggger;
         private System.Timers.Timer _timer;
 
         public Program()
@@ -38,22 +37,24 @@ namespace Assembly_Bot
             try
             {
                 // Setup services
-                services = new ServiceCollection()
+                using var services = new ServiceCollection()
                     .AddSingleton<DiscordSocketClient>()
                     .AddSingleton<CommandService>()
                     .AddSingleton<CommandHandler>()
                     .AddSingleton<Logs>()
                     .AddSingleton<Behaviour>()
+                    .AddSingleton<Edt>()
                     .BuildServiceProvider();
                 _client = services.GetRequiredService<DiscordSocketClient>();
+                _loggger = services.GetRequiredService<Logs>();
 
-                _client.Log += services.GetRequiredService<Logs>().Log;
-                services.GetRequiredService<CommandService>().Log += services.GetRequiredService<Logs>().Log;
+                _client.Log += _loggger.Log;
+                services.GetRequiredService<CommandService>().Log += _loggger.Log;
 
                 _client.Ready += async () =>
                 {
                     // Log that we're ready
-                    await services.GetRequiredService<Logs>().Log(new LogMessage(LogSeverity.Info, "Ready", $"Connected as {_client.CurrentUser} on {_client.Guilds.Count} servers"));
+                    await _loggger.Log(new LogMessage(LogSeverity.Info, "Ready", $"Connected as {_client.CurrentUser} on {_client.Guilds.Count} servers"));
 
 #if !DEBUG
                     if (_isFirstTimeReady)
@@ -113,7 +114,7 @@ namespace Assembly_Bot
 
                 await Task.Delay(-1);
             }
-            catch (Exception e) { await services.GetRequiredService<Logs>().Log(new LogMessage(LogSeverity.Error, "InstallCommands", e.Message, e)); }
+            catch (Exception e) { await _loggger.Log(new LogMessage(LogSeverity.Error, "InstallCommands", e.Message, e)); }
         }
     }
 }

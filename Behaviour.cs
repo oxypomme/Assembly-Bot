@@ -15,6 +15,15 @@ namespace Assembly_Bot
         private (bool falert, bool salert) _isAlreadyAlerted = (false, false);
         private DateTime _lastUpdate;
 
+        private Edt _edt;
+        private Logs _logger;
+
+        public Behaviour(IServiceProvider services)
+        {
+            _edt = services.GetRequiredService<Edt>();
+            _logger = services.GetRequiredService<Logs>();
+        }
+
         public void AlertStudents(object sender, System.Timers.ElapsedEventArgs e)
         {
             Task.Run(async () =>
@@ -24,33 +33,25 @@ namespace Assembly_Bot
                     if (_lastUpdate.AddHours(2) <= DateTime.Now)
                     {
                         _lastUpdate = DateTime.Now;
-                        await EdtUtils.ReloadEdt();
+                        await _edt.ReloadEdt();
                     }
-                    foreach (var edt in EdtUtils.edts) //TODO: Tasks ?
+                    foreach (var edt in _edt.edts) //TODO: Tasks ?
                     {
                         Day day; // DayOfWeek.Sunday = 0, or in the JSON, Sunday is the 7th day
-                        Console.WriteLine($"We're {DateTime.Today.DayOfWeek} ({(int)DateTime.Today.DayOfWeek})");
                         if (DateTime.Today.DayOfWeek == DayOfWeek.Sunday)
-                        {
                             day = edt.Weeks[0].Days[6]; // Get the real Sunday
-                            Console.WriteLine($"Getted i:6");
-                        }
                         else
-                        {
                             day = edt.Weeks[0].Days[(int)DateTime.Today.DayOfWeek - 1]; // Get the day
-                            Console.WriteLine($"Getted i:" + ((int)DateTime.Today.DayOfWeek - 1));
-                        }
+
                         SocketTextChannel channel;
 #if DEBUG
                         channel = Sandbox.main;
 #endif
-                        Console.WriteLine("Is it time ?");
                         foreach (var evnt in day.Events) //TODO: Tasks ?
                         {
                             var timeLeft = evnt.Dtstart.Subtract(DateTime.Now);
                             if (timeLeft.Hours == 0 && timeLeft.Minutes <= 15 && !(_isAlreadyAlerted.falert && _isAlreadyAlerted.salert))
                             {
-                                Console.WriteLine("15min before next lesson !");
                                 var eventSplitted = evnt.Summary.Split(" - ");
                                 // Mat - Group - Room - Type
 #if !DEBUG
@@ -63,27 +64,24 @@ namespace Assembly_Bot
 #endif
                                 if (timeLeft.Minutes == 15 && !_isAlreadyAlerted.falert)
                                 {
-                                    Console.WriteLine("ping 15");
                                     await ChatUtils.PingMessage(channel, $"{eventSplitted[0]} dans 15 minutes.");
                                     _isAlreadyAlerted.falert = true;
                                 }
                                 else if (timeLeft.Minutes == 5 && !_isAlreadyAlerted.salert)
                                 {
-                                    Console.WriteLine("ping 5");
                                     await ChatUtils.PingMessage(channel, $"{eventSplitted[0]} dans 5 minutes.", channel.Guild.EveryoneRole);
                                     _isAlreadyAlerted.salert = true;
                                 }
                             }
                             else if ((timeLeft.Hours != 0 || timeLeft.Minutes != 10) && _isAlreadyAlerted.falert && _isAlreadyAlerted.salert)
                             {
-                                Console.WriteLine("reset ping");
                                 _isAlreadyAlerted.falert = false;
                                 _isAlreadyAlerted.salert = false;
                             }
                         }
                     }
                 }
-                catch (Exception e) { await Program.services.GetRequiredService<Logs>().Log(new LogMessage(LogSeverity.Error, "AlertStudents", e.Message, e)); }
+                catch (Exception e) { await _logger.Log(new LogMessage(LogSeverity.Error, "AlertStudents", e.Message, e)); }
             });
         }
 

@@ -1,4 +1,5 @@
-﻿using Assembly_Bot.Models;
+﻿using Assembly_Bot.Extensions;
+using Assembly_Bot.Models;
 using Discord;
 using Discord.Rest;
 using Microsoft.Extensions.DependencyInjection;
@@ -12,19 +13,26 @@ using System.Threading.Tasks;
 
 namespace Assembly_Bot
 {
-    internal static class EdtUtils
+    internal class Edt
     {
-        public static List<Edt> edts = new List<Edt>();
+        public List<Models.Edt> edts = new List<Models.Edt>();
 
         private static readonly string[] edtCodes = { "4352c5485001785", "1c57595e2401824" };
 
-        private static RestUserMessage[] _edtMessages = new RestUserMessage[edtCodes.Length];
-        private static bool _edtIsSundayAlreadyPosted;
+        private RestUserMessage[] _edtMessages = new RestUserMessage[edtCodes.Length];
+        private bool _edtIsSundayAlreadyPosted;
 
-        public static async Task ReloadEdt(bool forceJSON = false, bool forceDOWN = false)
+        private Logs _logger;
+
+        public Edt(IServiceProvider services)
+        {
+            _logger = services.GetRequiredService<Logs>();
+        }
+
+        public async Task ReloadEdt(bool forceJSON = false, bool forceDOWN = false)
         {
             while (edts.Count < edtCodes.Length) // If the timetable doesn't exist
-                edts.Add(new Edt());
+                edts.Add(new Models.Edt());
 
             await Task.WhenAll(edtCodes.Select(async (code, i) =>
             {
@@ -44,7 +52,7 @@ namespace Assembly_Bot
                             if (isJsonUpdated)
                             {
                                 // Converts the JSON to Objects
-                                edts[i] = JsonConvert.DeserializeObject<Edt>(json);
+                                edts[i] = JsonConvert.DeserializeObject<Models.Edt>(json);
                                 edts[i].RawJsonCode = json.GetHashCode(StringComparison.OrdinalIgnoreCase);
                             }
 
@@ -100,11 +108,11 @@ namespace Assembly_Bot
                                 );
                             }
                         }
-                        catch (Exception e) { await Program.services.GetRequiredService<Logs>().Log(new LogMessage(LogSeverity.Error, "ReloadEdt", e.Message, e)); }
+                        catch (Exception e) { await _logger.Log(new LogMessage(LogSeverity.Error, "ReloadEdt", e.Message, e)); }
                     else
                         throw new TimeoutException("Can't get distant JSON");
                 }
-                catch (Exception e) { await Program.services.GetRequiredService<Logs>().Log(new LogMessage(LogSeverity.Error, "ReloadEdt", e.Message, e)); }
+                catch (Exception e) { await _logger.Log(new LogMessage(LogSeverity.Error, "ReloadEdt", e.Message, e)); }
             }));
             // If today is not a Sunday, allow edts update from Sundays
             if (DateTime.Today.DayOfWeek != DayOfWeek.Sunday)
