@@ -58,7 +58,7 @@ namespace Assembly_Bot
 #if !DEBUG
                     if (_isFirstTimeReady)
                         // Bypass the condition in previous statement
-                        await services.GetRequiredService<GlobalBehaviour>().LogOnDiscord("Hello world", "I've just awoken my master !", Color.Green, new List<EmbedFieldBuilder>
+                        await services.GetRequiredService<Logs>().LogOnDiscord("Hello world", "I've just awoken my master !", Color.Green, new List<EmbedFieldBuilder>
                         {
                             new EmbedFieldBuilder() { Name = "Launch platform", Value = Environment.OSVersion + "\nat " + DateTime.Now.ToString("HH:mm:ss") }
                         }).ConfigureAwait(true);
