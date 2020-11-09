@@ -31,7 +31,7 @@ namespace Assembly_Bot
         // Starting the program in async
         public static void Main(string[] args) => new Program().MainAsync().GetAwaiter().GetResult();
 
-        private bool _isFirstTimeReady;
+        private bool _isFirstTimeReady = true;
 
         public async Task MainAsync()
         {
