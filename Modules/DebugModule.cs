@@ -14,7 +14,6 @@ namespace Assembly_Bot.Modules
     {
         [Command("roleinfo")]
         [Summary("Get info about a role.")]
-        [RequireOwner]
         [RequireBotPermission(ChannelPermission.SendMessages)]
         public async Task MentionRoleAsync(IRole role)
         {
