@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Assembly_Bot
 {
-    public class GlobalBehaviour
+    public class Logs
     {
         public async Task Log(LogMessage message)
         {

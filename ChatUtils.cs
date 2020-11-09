@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Assembly_Bot
 {
-    internal class ChatUtils
+    internal static class ChatUtils
     {
         [RequireBotPermission(ChannelPermission.ManageMessages)]
         public static async Task CleanChannel(ISocketMessageChannel channel, int count)
