@@ -46,7 +46,7 @@ namespace Assembly_Bot
             Console.ResetColor();
         }
 
-        private async Task LogOnDiscord(string title, string message, Color color, List<EmbedFieldBuilder> fields = null, bool isImportant = false)
+        public async Task LogOnDiscord(string title, string message, Color color, List<EmbedFieldBuilder> fields = null, bool isImportant = false)
         {
             try
             {

@@ -102,6 +102,7 @@ namespace Assembly_Bot
 
         private (bool falert, bool salert) _isAlreadyAlerted = (false, false);
         private DateTime _lastUpdate;
+        private bool _isFirstTimeReady;
 
         public void AlertStudents(object sender, System.Timers.ElapsedEventArgs e)
         {
@@ -142,12 +143,12 @@ namespace Assembly_Bot
                                 var eventSplitted = evnt.Summary.Split(" - ");
                                 // Mat - Group - Room - Type
 #if !DEBUG
-                                    if (eventSplitted[1].EndsWith("grp3.1"))
-                                        channel = Apsu.infos[1];
-                                    else if (eventSplitted[1].EndsWith("grp3.2"))
-                                        channel = Apsu.infos[2];
-                                    else
-                                        channel = Apsu.infos[0];
+                                if (eventSplitted[1].EndsWith("grp3.1"))
+                                    channel = Apsu.infos[1];
+                                else if (eventSplitted[1].EndsWith("grp3.2"))
+                                    channel = Apsu.infos[2];
+                                else
+                                    channel = Apsu.infos[0];
 #endif
                                 if (timeLeft.Minutes == 15 && !_isAlreadyAlerted.falert)
                                 {
