@@ -100,11 +100,11 @@ namespace Assembly_Bot
                                 );
                             }
                         }
-                        catch (Exception e) { await Program.services.GetRequiredService<GlobalBehaviour>().Log(new LogMessage(LogSeverity.Error, "ReloadEdt", e.Message, e)); }
+                        catch (Exception e) { await Program.services.GetRequiredService<Logs>().Log(new LogMessage(LogSeverity.Error, "ReloadEdt", e.Message, e)); }
                     else
                         throw new TimeoutException("Can't get distant JSON");
                 }
-                catch (Exception e) { await Program.services.GetRequiredService<GlobalBehaviour>().Log(new LogMessage(LogSeverity.Error, "ReloadEdt", e.Message, e)); }
+                catch (Exception e) { await Program.services.GetRequiredService<Logs>().Log(new LogMessage(LogSeverity.Error, "ReloadEdt", e.Message, e)); }
             }));
             // If today is not a Sunday, allow edts update from Sundays
             if (DateTime.Today.DayOfWeek != DayOfWeek.Sunday)

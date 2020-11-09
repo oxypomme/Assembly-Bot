@@ -31,149 +31,89 @@ namespace Assembly_Bot
         // Starting the program in async
         public static void Main(string[] args) => new Program().MainAsync().GetAwaiter().GetResult();
 
+        private bool _isFirstTimeReady;
+
         public async Task MainAsync()
         {
-            // Setup services
-            services = new ServiceCollection()
-                .AddSingleton<DiscordSocketClient>()
-                .AddSingleton<CommandService>()
-                .AddSingleton<CommandHandler>()
-                .AddSingleton<GlobalBehaviour>()
-                .BuildServiceProvider();
-            _client = services.GetRequiredService<DiscordSocketClient>();
-
-            _client.Log += services.GetRequiredService<GlobalBehaviour>().Log;
-            services.GetRequiredService<CommandService>().Log += services.GetRequiredService<GlobalBehaviour>().Log;
-
-            _client.Ready += async () =>
-            {
-                // Log that we're ready
-                await services.GetRequiredService<GlobalBehaviour>().Log(new LogMessage(LogSeverity.Info, "Ready", $"Connected as {_client.CurrentUser} on {_client.Guilds.Count} servers"));
-
-#if !DEBUG
-                if (_isFirstTimeReady)
-                    // Bypass the condition in previous statement
-                    await services.GetRequiredService<GlobalBehaviour>().LogOnDiscord("Hello world", "I've just awoken my master !", Color.Green, new List<EmbedFieldBuilder>
-                    {
-                        new EmbedFieldBuilder() { Name = "Launch platform", Value = Environment.OSVersion + "\nat " + DateTime.Now.ToString("HH:mm:ss") }
-                    }).ConfigureAwait(true);
-                _isFirstTimeReady = false;
-#endif
-            };
-
-            // Setup and starting the bot
-            await _client.LoginAsync(TokenType.Bot, File.ReadLines("token.txt").First());
-            await _client.StartAsync();
             try
             {
-                await services.GetRequiredService<CommandHandler>().InstallCommandsAsync();
-            }
-            catch (Exception e) { await services.GetRequiredService<GlobalBehaviour>().Log(new LogMessage(LogSeverity.Error, "InstallCommands", e.Message, e)); }
+                // Setup services
+                services = new ServiceCollection()
+                    .AddSingleton<DiscordSocketClient>()
+                    .AddSingleton<CommandService>()
+                    .AddSingleton<CommandHandler>()
+                    .AddSingleton<Logs>()
+                    .AddSingleton<Behaviour>()
+                    .BuildServiceProvider();
+                _client = services.GetRequiredService<DiscordSocketClient>();
 
-            // Just fooling around with activity
+                _client.Log += services.GetRequiredService<Logs>().Log;
+                services.GetRequiredService<CommandService>().Log += services.GetRequiredService<Logs>().Log;
+
+                _client.Ready += async () =>
+                {
+                    // Log that we're ready
+                    await services.GetRequiredService<Logs>().Log(new LogMessage(LogSeverity.Info, "Ready", $"Connected as {_client.CurrentUser} on {_client.Guilds.Count} servers"));
+
+#if !DEBUG
+                    if (_isFirstTimeReady)
+                        // Bypass the condition in previous statement
+                        await services.GetRequiredService<Logs>().LogOnDiscord("Hello world", "I've just awoken my master !", Color.Green, new List<EmbedFieldBuilder>
+                        {
+                            new EmbedFieldBuilder() { Name = "Launch platform", Value = Environment.OSVersion + "\nat " + DateTime.Now.ToString("HH:mm:ss") }
+                        }).ConfigureAwait(true);
+                    _isFirstTimeReady = false;
+#endif
+                };
+
+                // Setup and starting the bot
+                await _client.LoginAsync(TokenType.Bot, File.ReadLines("token.txt").First());
+                await _client.StartAsync();
+
+                await services.GetRequiredService<CommandHandler>().InstallCommandsAsync();
+
+                // Just fooling around with activity
 #if DEBUG
-            await _client.SetGameAsync("laboratoire", type: ActivityType.Playing);
+                await _client.SetGameAsync("laboratoire", type: ActivityType.Playing);
 #else
-            await _client.SetGameAsync("Sbotify", type: ActivityType.Listening);
+                await _client.SetGameAsync("Sbotify", type: ActivityType.Listening);
 #endif
 
-            // Setup some events
-            _client.UserVoiceStateUpdated += async (user, oldVoiceState, newVoiceState) =>
-            {
-                // [Specific APSU] Setup the cleaner for work channels
-                await VoiceUtils.GroupChatToClean(user, oldVoiceState, newVoiceState);
-            };
+                // Setup some events
+                _client.UserVoiceStateUpdated += async (user, oldVoiceState, newVoiceState) =>
+                {
+                    try
+                    {
+                        // [Specific APSU] Setup the cleaner for work channels
+                        await services.GetRequiredService<Behaviour>().GroupChatToClean(user, oldVoiceState, newVoiceState);
+                    }
+                    catch (Exception ex) { await services.GetRequiredService<Logs>().Log(new LogMessage(LogSeverity.Error, "VoiceStateUpdated", ex.Message, ex)); }
+                };
 
-            // Setup a Timer
-            _timer = new System.Timers.Timer(
+                // Setup a Timer
+                _timer = new System.Timers.Timer(
 #if DEBUG
                 10000
 #else
                 30000
 #endif
-            );
-            //
-            _timer.Elapsed += AlertStudents;
-            _timer.AutoReset = true;
-            _timer.Enabled = true;
+                );
 
-            await Task.Delay(-1);
-        }
-
-        private (bool falert, bool salert) _isAlreadyAlerted = (false, false);
-        private DateTime _lastUpdate;
-        private bool _isFirstTimeReady;
-
-        public void AlertStudents(object sender, System.Timers.ElapsedEventArgs e)
-        {
-            Task.Run(async () =>
-            {
-                try
+                _timer.Elapsed += async (sender, e) =>
                 {
-                    if (_lastUpdate.AddHours(2) <= DateTime.Now)
+                    try
                     {
-                        _lastUpdate = DateTime.Now;
-                        await EdtUtils.ReloadEdt();
+                        // [Specific APSU] The alerts
+                        services.GetRequiredService<Behaviour>().AlertStudents(sender, e);
                     }
-                    foreach (var edt in EdtUtils.edts) //TODO: Tasks ?
-                    {
-                        Day day; // DayOfWeek.Sunday = 0, or in the JSON, Sunday is the 7th day
-                        Console.WriteLine($"We're {DateTime.Today.DayOfWeek} ({(int)DateTime.Today.DayOfWeek})");
-                        if (DateTime.Today.DayOfWeek == DayOfWeek.Sunday)
-                        {
-                            day = edt.Weeks[0].Days[6]; // Get the real Sunday
-                            Console.WriteLine($"Getted i:6");
-                        }
-                        else
-                        {
-                            day = edt.Weeks[0].Days[(int)DateTime.Today.DayOfWeek - 1]; // Get the day
-                            Console.WriteLine($"Getted i:" + ((int)DateTime.Today.DayOfWeek - 1));
-                        }
-                        SocketTextChannel channel;
-#if DEBUG
-                        channel = Sandbox.main;
-#endif
-                        Console.WriteLine("Is it time ?");
-                        foreach (var evnt in day.Events) //TODO: Tasks ?
-                        {
-                            var timeLeft = evnt.Dtstart.Subtract(DateTime.Now);
-                            if (timeLeft.Hours == 0 && timeLeft.Minutes <= 15 && !(_isAlreadyAlerted.falert && _isAlreadyAlerted.salert))
-                            {
-                                Console.WriteLine("15min before next lesson !");
-                                var eventSplitted = evnt.Summary.Split(" - ");
-                                // Mat - Group - Room - Type
-#if !DEBUG
-                                if (eventSplitted[1].EndsWith("grp3.1"))
-                                    channel = Apsu.infos[1];
-                                else if (eventSplitted[1].EndsWith("grp3.2"))
-                                    channel = Apsu.infos[2];
-                                else
-                                    channel = Apsu.infos[0];
-#endif
-                                if (timeLeft.Minutes == 15 && !_isAlreadyAlerted.falert)
-                                {
-                                    Console.WriteLine("ping 15");
-                                    await ChatUtils.PingMessage(channel, $"{eventSplitted[0]} dans 15 minutes.");
-                                    _isAlreadyAlerted.falert = true;
-                                }
-                                else if (timeLeft.Minutes == 5 && !_isAlreadyAlerted.salert)
-                                {
-                                    Console.WriteLine("ping 5");
-                                    await ChatUtils.PingMessage(channel, $"{eventSplitted[0]} dans 5 minutes.", channel.Guild.EveryoneRole);
-                                    _isAlreadyAlerted.salert = true;
-                                }
-                            }
-                            else if ((timeLeft.Hours != 0 || timeLeft.Minutes != 10) && _isAlreadyAlerted.falert && _isAlreadyAlerted.salert)
-                            {
-                                Console.WriteLine("reset ping");
-                                _isAlreadyAlerted.falert = false;
-                                _isAlreadyAlerted.salert = false;
-                            }
-                        }
-                    }
-                }
-                catch (Exception e) { await services.GetRequiredService<GlobalBehaviour>().Log(new LogMessage(LogSeverity.Error, "AlertStudents", e.Message, e)); }
-            });
+                    catch (Exception ex) { await services.GetRequiredService<Logs>().Log(new LogMessage(LogSeverity.Error, "TimerElapsed", ex.Message, ex)); }
+                };
+                _timer.AutoReset = true;
+                _timer.Enabled = true;
+
+                await Task.Delay(-1);
+            }
+            catch (Exception e) { await services.GetRequiredService<Logs>().Log(new LogMessage(LogSeverity.Error, "InstallCommands", e.Message, e)); }
         }
     }
 }

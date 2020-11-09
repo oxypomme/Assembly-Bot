@@ -15,7 +15,7 @@ namespace Assembly_Bot.Modules
     public class AdminModule : ModuleBase<SocketCommandContext>
     {
         [Command("clean", RunMode = RunMode.Async)]
-        [Alias("cleans", "clear", "clears")]
+        [Alias("cleans", "clear", "clears", "purge", "prune")]
         [Summary("Cleans the specified amount of messages in the channel.")]
         [RequireBotPermission(ChannelPermission.ManageMessages)]
         public async Task CleanAsync([Summary("Default 100")] int count = 100)
