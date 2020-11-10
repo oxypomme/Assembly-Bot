@@ -14,7 +14,7 @@ namespace Assembly_Bot
         private readonly CommandService _commands;
         private readonly IServiceProvider _services;
 
-        public const string prefix = ",";
+        public const string prefix = "<<";
 
         public CommandHandler(IServiceProvider services)
         {
