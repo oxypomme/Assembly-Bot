@@ -13,9 +13,11 @@ namespace Assembly_Bot
         private readonly DiscordSocketClient _client;
         private readonly CommandService _commands;
         private readonly IServiceProvider _services;
-
+#if DEBUG
+        public const string prefix = ">>";
+#else
         public const string prefix = "<<";
-
+#endif
         public CommandHandler(IServiceProvider services)
         {
             _services = services;
