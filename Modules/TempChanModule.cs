@@ -27,8 +27,6 @@ namespace Assembly_Bot.Modules
         [Command("create")]
         [Alias("new")]
         [Summary("Ask Temp-chan to create a private category.")]
-        [RequireBotPermission(GuildPermission.ManageChannels)]
-        [RequireBotPermission(GuildPermission.MoveMembers)]
         public async Task CreatePrivAsync(
             [Summary("The name of the channels")] string name = "",
             [Summary("The maximum users in the voice channel")] int maxUsers = 0,
@@ -115,9 +113,6 @@ namespace Assembly_Bot.Modules
         [Command("delete")]
         [Summary("Ask Temp-chan to delete a private category.")]
         [Priority(1)]
-        [RequireBotPermission(GuildPermission.ManageChannels)]
-        [RequireBotPermission(GuildPermission.MoveMembers)]
-        [RequireUserPermission(GuildPermission.Administrator)]
         public async Task RemovePrivAsync([Summary("The id of the category or any of the channels")] ulong id)
         {
             IUserMessage initMessage = null;
@@ -157,8 +152,6 @@ namespace Assembly_Bot.Modules
 
         [Command("delete")]
         [Summary("Ask Temp-chan to delete a private category.")]
-        [RequireBotPermission(GuildPermission.ManageChannels)]
-        [RequireBotPermission(GuildPermission.MoveMembers)]
         [RequireUserPermission(GuildPermission.Administrator)]
         public async Task RemovePrivAsync([Summary("The name of the category or any of the channels")] string name)
         {
@@ -193,8 +186,6 @@ namespace Assembly_Bot.Modules
         [Command("delete")]
         [Alias("clean", "clear", "prune")]
         [Summary("Ask Temp-chan to delete all privates category.")]
-        [RequireBotPermission(GuildPermission.ManageChannels)]
-        [RequireBotPermission(GuildPermission.MoveMembers)]
         [RequireUserPermission(GuildPermission.Administrator)]
         public async Task RemovePrivAsync()
         {

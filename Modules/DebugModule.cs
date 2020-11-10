@@ -10,11 +10,11 @@ namespace Assembly_Bot.Modules
 {
     [Group("debug")]
     [Summary("Utils Commands : `debug`")]
+    [RequireOwner]
     public class DebugModule : ModuleBase<SocketCommandContext>
     {
         [Command("roleinfo")]
         [Summary("Get info about a role.")]
-        [RequireBotPermission(ChannelPermission.SendMessages)]
         public async Task MentionRoleAsync(IRole role)
         {
             var embed = new EmbedBuilder();

@@ -17,7 +17,6 @@ namespace Assembly_Bot.Modules
         [Command("clean", RunMode = RunMode.Async)]
         [Alias("cleans", "clear", "clears", "purge", "prune")]
         [Summary("Cleans the specified amount of messages in the channel.")]
-        [RequireBotPermission(ChannelPermission.ManageMessages)]
         public async Task CleanAsync([Summary("Default 100")] int count = 100)
         {
             await Context.Message.DeleteAsync();
@@ -31,7 +30,6 @@ namespace Assembly_Bot.Modules
 
         [Command("mutev", RunMode = RunMode.Async)]
         [Summary("Mute a whole voice chat for a specified duration.")]
-        [RequireBotPermission(GuildPermission.ManageRoles)]
         public async Task MuteVoiceAsync([Summary("The id of the voice channel. Default it's yours")] ulong vid = 0, [Summary("The duration of the mute. Default 1 min")] int secs = 60)
         {
             SocketVoiceChannel channel = Context.Guild.GetVoiceChannel(vid);

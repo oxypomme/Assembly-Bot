@@ -20,8 +20,6 @@ namespace Assembly_Bot.Modules
         [Command("force")]
         [Summary("Force an update of timetables")]
         [RequireOwner]
-        [RequireBotPermission(ChannelPermission.ManageMessages)]
-        [RequireBotPermission(ChannelPermission.SendMessages)]
         public async Task ForceEdtUpdate()
         {
             await _edt.ReloadEdt(true);
