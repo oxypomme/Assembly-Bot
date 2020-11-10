@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 namespace Assembly_Bot.Modules
 {
     [Group("admin")]
-    [Summary("Admin Commands")]
+    [Summary("Admin Commands : `admin`")]
     [RequireUserPermission(GuildPermission.Administrator)]
     public class AdminModule : ModuleBase<SocketCommandContext>
     {

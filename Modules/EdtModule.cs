@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace Assembly_Bot.Modules
 {
     [Group("edt")]
-    [Summary("EDT Commands")]
+    [Summary("EDT Commands : `edt`")]
     public class EdtModule : ModuleBase<SocketCommandContext>
     {
         private Edt _edt;

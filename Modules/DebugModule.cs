@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 namespace Assembly_Bot.Modules
 {
     [Group("debug")]
-    [Summary("Utils Commands")]
+    [Summary("Utils Commands : `debug`")]
     public class DebugModule : ModuleBase<SocketCommandContext>
     {
         [Command("roleinfo")]
