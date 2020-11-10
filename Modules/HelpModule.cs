@@ -40,9 +40,11 @@ namespace Assembly_Bot.Modules
         [Command("help")]
         [Alias("h")]
         [Summary("Show informations about a command")]
-        public async Task HelpCommand([Summary("The command to explain")] string commandName)
+        public async Task HelpCommand([Summary("The group to explain")] string commandGroup, [Summary("The command to explain")] string commandName = "")
         {
-            var commands = _commands.Commands.Where(c => c.Name == commandName.ToLower());
+            var commands = _commands.Commands.Where(c => c.Module.Group == commandGroup.ToLower());
+            if (commandName != "")
+                commands = commands.Where(c => string.Equals(c.Name, commandName, StringComparison.OrdinalIgnoreCase) || c.Aliases.Any(a => a.Contains(commandName, StringComparison.OrdinalIgnoreCase)));
             if (!commands.Any())
             {
                 var errorMessage = await ReplyAsync("", embed: ChatUtils.CreateEmbed("", "There are no commands with that name.", Color.DarkBlue));
@@ -54,14 +56,16 @@ namespace Assembly_Bot.Modules
             var embedBuilder = new EmbedBuilder().WithColor(Color.DarkBlue);
             foreach (var cmd in commands)
             {
-                embedBuilder.AddField("Command " + cmd.Name, "" +
-                    string.Join("\n", cmd.Aliases.Select(a => "`" + CommandHandler.prefix + a + string.Join("", cmd.Parameters.Select(p => " [" + p.Name + "]")) + "`")) +
-                    "\n__Summary :__ \n" +
-                    "*" + (cmd.Summary ?? "No description available") + "*\n" +
-                    (cmd.Parameters.Count() > 0
-                        ? "__Parameters :__ " + string.Concat(cmd.Parameters.Select(p => "\n[" + p.Name + "] : *" + (p.Summary ?? "No description available") + "*")) + "\n"
-                        : "") +
-                    "");
+                embedBuilder.AddField(
+                    "Command " + cmd.Name, ""
+                    + (commandName != "" ?
+                        string.Join("\n", cmd.Aliases.Select(a => "`" + CommandHandler.prefix + a + string.Join("", cmd.Parameters.Select(p => " [" + p.Name + "]")) + "`"))
+                        : string.Join("\n", "`" + CommandHandler.prefix + cmd.Name + string.Concat(cmd.Parameters.Select(p => " [" + p.Name + "]")) + "`"))
+                    + "\n__Summary :__ \n"
+                    + "*" + (cmd.Summary ?? "No description available") + "*\n" +
+                    (commandName != "" ?
+                        (cmd.Parameters.Count() > 0 ? "__Parameters :__ " + string.Concat(cmd.Parameters.Select(p => "\n[" + p.Name + "] : *" + (p.Summary ?? "No description available") + "*")) + "\n" : "") + ""
+                        : ""));
             }
             await ReplyAsync("", embed: ChatUtils.CreateEmbed(embedBuilder));
         }
