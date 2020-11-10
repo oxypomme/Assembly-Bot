@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Timers;
 
 namespace Assembly_Bot
 {
@@ -33,7 +34,9 @@ namespace Assembly_Bot
                     if (_lastUpdate.AddHours(2) <= DateTime.Now)
                     {
                         _lastUpdate = DateTime.Now;
+#if !DEBUG
                         await _edt.ReloadEdt();
+#endif
                     }
                     foreach (var edt in _edt.edts) //TODO: Tasks ?
                     {
@@ -94,13 +97,13 @@ namespace Assembly_Bot
 #if DEBUG
                 if (newVoiceState.VoiceChannel.Name.StartsWith("VocalABot"))
                 {
-                    var channel = newVoiceState.VoiceChannel.Guild.TextChannels.First(chan => chan.Name == newVoiceState.VoiceChannel.Name.ToLower());
+                    var channel = newVoiceState.VoiceChannel.Guild.TextChannels.First(chan => string.Equals(chan.Name, newVoiceState.VoiceChannel.Name, StringComparison.OrdinalIgnoreCase));
                     await channel.AddPermissionOverwriteAsync(user, new OverwritePermissions(viewChannel: PermValue.Allow));
                 }
 #else
                 if (newVoiceState.VoiceChannel.Name.StartsWith("Duo") || newVoiceState.VoiceChannel.Name.StartsWith("Trio") || newVoiceState.VoiceChannel.Name.StartsWith("Quatuor"))
                 {
-                    var channel = newVoiceState.VoiceChannel.Guild.TextChannels.First(chan => chan.Name == newVoiceState.VoiceChannel.Name.ToLower());
+                    var channel = newVoiceState.VoiceChannel.Guild.TextChannels.First(chan => string.Equals(chan.Name, newVoiceState.VoiceChannel.Name, StringComparison.OrdinalIgnoreCase));
                     await channel.AddPermissionOverwriteAsync(user, new OverwritePermissions(viewChannel: PermValue.Allow));
                 }
 #endif
@@ -109,27 +112,42 @@ namespace Assembly_Bot
                 && (oldVoiceState.VoiceChannel.Guild.Id == Apsu.server.Id || oldVoiceState.VoiceChannel.Guild.Id == Sandbox.server.Id))
             // Just activate this functionality on the APSU and my test server
             {
-#if DEBUG
-                if (oldVoiceState.VoiceChannel.Name.StartsWith("VocalABot") && oldVoiceState.VoiceChannel.Users.Count == 0)
+#if !DEBUG
+                if (oldVoiceState.VoiceChannel.Name.StartsWith("VocalABot"))
                 {
-                    var channel = oldVoiceState.VoiceChannel.Guild.TextChannels.First(chan => chan.Name == oldVoiceState.VoiceChannel.Name.ToLower());
+                    var channel = oldVoiceState.VoiceChannel.Guild.TextChannels.First(chan => string.Equals(chan.Name, oldVoiceState.VoiceChannel.Name, StringComparison.OrdinalIgnoreCase));
                     await channel.RemovePermissionOverwriteAsync(user);
-                    while (await channel.GetMessagesAsync(1).FlattenAsync() != null)
-                    {
-                        await ChatUtils.CleanChannel(channel, 1);
-                    }
+
+                    if (oldVoiceState.VoiceChannel.Users.Count == 0)
+                        while (await channel.GetMessagesAsync(1).FlattenAsync() != null)
+                            await ChatUtils.CleanChannel(channel, 1);
                 }
 #else
-                if ((oldVoiceState.VoiceChannel.Name.StartsWith("Duo") || oldVoiceState.VoiceChannel.Name.StartsWith("Trio") || oldVoiceState.VoiceChannel.Name.StartsWith("Quatuor")) && oldVoiceState.VoiceChannel.Users.Count == 0)
+                if ((oldVoiceState.VoiceChannel.Name.StartsWith("Duo") || oldVoiceState.VoiceChannel.Name.StartsWith("Trio") || oldVoiceState.VoiceChannel.Name.StartsWith("Quatuor")))
                 {
-                    var channel = oldVoiceState.VoiceChannel.Guild.TextChannels.First(chan => chan.Name == oldVoiceState.VoiceChannel.Name.ToLower());
+                    var channel = oldVoiceState.VoiceChannel.Guild.TextChannels.First(chan => string.Equals(chan.Name, oldVoiceState.VoiceChannel.Name, StringComparison.OrdinalIgnoreCase));
                     await channel.RemovePermissionOverwriteAsync(user);
-                    while (await channel.GetMessageAsync(1) != null)
-                    {
-                        await ChatUtils.CleanChannel(channel, 100);
-                    }
+
+                    if (oldVoiceState.VoiceChannel.Users.Count == 0)
+                        while (await channel.GetMessageAsync(1) != null)
+                            await ChatUtils.CleanChannel(channel, 100);
                 }
 #endif
+            }
+        }
+
+        internal async Task ClearTempChans(SocketVoiceChannel vchannel)
+        {
+            if (vchannel != null && vchannel.Category.Name.StartsWith("tmp-") && vchannel.Users.Count == 0)
+            {
+                // Delete text channel
+                await vchannel.Guild.TextChannels.First(chan => string.Equals(chan.Name, vchannel.Name, StringComparison.OrdinalIgnoreCase)).DeleteAsync();
+                // Ensure that we delete the category in the end
+                var cat = vchannel.Category;
+                // Delete voice channel
+                await vchannel.DeleteAsync();
+                // Finally delete the category
+                await cat.DeleteAsync();
             }
         }
     }

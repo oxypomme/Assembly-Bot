@@ -38,15 +38,15 @@ namespace Assembly_Bot
             try
             {
                 // Setup services
+                _client = new DiscordSocketClient();
                 services = new ServiceCollection()
-                    .AddSingleton<DiscordSocketClient>()
+                    .AddSingleton(_client)
                     .AddSingleton<CommandService>()
                     .AddSingleton<CommandHandler>()
                     .AddSingleton<Logs>()
                     .AddSingleton<Behaviour>()
                     .AddSingleton<Edt>()
                     .BuildServiceProvider();
-                _client = services.GetRequiredService<DiscordSocketClient>();
                 _loggger = services.GetRequiredService<Logs>();
 
                 _client.Log += _loggger.Log;
@@ -86,6 +86,8 @@ namespace Assembly_Bot
                 {
                     try
                     {
+                        // Clear any empty temporary channel
+                        await services.GetRequiredService<Behaviour>().ClearTempChans(oldVoiceState.VoiceChannel);
                         // [Specific APSU] Setup the cleaner for work channels
                         await services.GetRequiredService<Behaviour>().GroupChatToClean(user, oldVoiceState, newVoiceState);
                     }
