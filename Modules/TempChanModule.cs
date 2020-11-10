@@ -79,7 +79,7 @@ namespace Assembly_Bot.Modules
                 foreach (var user in userList)
                 {
                     await categ.AddPermissionOverwriteAsync(user, new OverwritePermissions(viewChannel: PermValue.Allow));
-                    //await user.ModifyAsync(u => u.Channel = vChan);
+                    await user.ModifyAsync(u => u.Channel = vChan);
                     userEmbed[1].WithValue(userEmbed[1].Value + (userEmbed[1].Value != null ? ", " : "") + user.Mention);
                 }
                 if (maxUsers > 0)
