@@ -55,7 +55,7 @@ namespace Assembly_Bot.Modules
                     userList.Add((SocketGuildUser)Context.User);
 
                 categ = await Context.Guild.CreateCategoryChannelAsync(categName);
-                await categ.AddPermissionOverwriteAsync(Context.User, new OverwritePermissions(manageChannel: PermValue.Allow, manageMessages: PermValue.Allow, muteMembers: PermValue.Allow, deafenMembers: PermValue.Allow));
+                await categ.AddPermissionOverwriteAsync(Context.User, new(manageChannel: PermValue.Allow, manageMessages: PermValue.Allow, muteMembers: PermValue.Allow, deafenMembers: PermValue.Allow));
 
                 tChan = await Context.Guild.CreateTextChannelAsync(name, c =>
                 {
@@ -71,17 +71,17 @@ namespace Assembly_Bot.Modules
 
                 var userEmbed = new List<EmbedFieldBuilder>()
                 {
-                    new EmbedFieldBuilder().WithName("Nom").WithValue(name).WithIsInline(true),
-                    new EmbedFieldBuilder().WithName("Avec").WithIsInline(true)
+                    new() {Name = "Nom", Value = name, IsInline = true },
+                    new() {Name = "Avec" }
                 };
                 foreach (var user in userList)
                 {
-                    await categ.AddPermissionOverwriteAsync(user, new OverwritePermissions(viewChannel: PermValue.Allow));
+                    await categ.AddPermissionOverwriteAsync(user, new(viewChannel: PermValue.Allow));
                     await user.ModifyAsync(u => u.Channel = vChan);
-                    userEmbed[1].WithValue(userEmbed[1].Value + (userEmbed[1].Value != null ? ", " : "") + user.Mention);
+                    userEmbed[1].WithValue(userEmbed[1].Value + (userEmbed[1].Value is not null ? ", " : "") + user.Mention);
                 }
                 if (maxUsers > 0)
-                    userEmbed.Add(new EmbedFieldBuilder().WithName("Maximum").WithValue(maxUsers).WithIsInline(true));
+                    userEmbed.Add(new() { Name = "Maximum", Value = maxUsers, IsInline = true });
                 await ReplyAsync("", embed: ChatUtils.CreateEmbed("Temp-chan", "Houra ! Vous êtes dans votre salon ! o(\\*^＠^\\*)o", Color.Green, userEmbed));
             }
             catch (System.Data.DuplicateNameException e)
@@ -96,11 +96,11 @@ namespace Assembly_Bot.Modules
                     await (tChan?.DeleteAsync() ?? Task.CompletedTask);
                     await (vChan?.DeleteAsync() ?? Task.CompletedTask);
                 }
-                catch (Exception ex) { await _logger.Log(new LogMessage(LogSeverity.Error, "TempChan - Cleanup", e.Message, ex)); }
+                catch (Exception ex) { await _logger.Log(new(LogSeverity.Error, "TempChan - Cleanup", e.Message, ex)); }
                 finally
                 {
                     await ReplyAsync("", embed: ChatUtils.CreateEmbed("Temp-chan", "OOPS, quelque chose est arrivé .·´¯\\`(>▂<)´¯\\`·. ", Color.Red));
-                    await _logger.Log(new LogMessage(LogSeverity.Error, "TempChan", e.Message, e));
+                    await _logger.Log(new(LogSeverity.Error, "TempChan", e.Message, e));
                 }
             }
             finally
@@ -142,7 +142,11 @@ namespace Assembly_Bot.Modules
                 await Task.Delay(delay);
                 await msg.DeleteAsync();
             }
-            catch (Exception e) { await ReplyAsync("", embed: ChatUtils.CreateEmbed("Temp-chan", e.Message, Color.Red)); }
+            catch (Exception e)
+            {
+                await ReplyAsync("", embed: ChatUtils.CreateEmbed("Temp-chan", e.Message, Color.Red));
+                await _logger.Log(new(LogSeverity.Error, "TempChan", e.Message, e));
+            }
             finally
             {
                 await (initMessage?.DeleteAsync() ?? Task.CompletedTask);
@@ -175,7 +179,11 @@ namespace Assembly_Bot.Modules
                 await Task.Delay(delay);
                 await msg.DeleteAsync();
             }
-            catch (Exception e) { await ReplyAsync("", embed: ChatUtils.CreateEmbed("Temp-chan", e.Message, Color.Red)); }
+            catch (Exception e)
+            {
+                await ReplyAsync("", embed: ChatUtils.CreateEmbed("Temp-chan", e.Message, Color.Red));
+                await _logger.Log(new(LogSeverity.Error, "TempChan", e.Message, e));
+            }
             finally
             {
                 await (initMessage?.DeleteAsync() ?? Task.CompletedTask);
@@ -205,7 +213,11 @@ namespace Assembly_Bot.Modules
                 await Task.Delay(delay);
                 await msg.DeleteAsync();
             }
-            catch (Exception e) { await ReplyAsync("", embed: ChatUtils.CreateEmbed("Temp-chan", e.Message, Color.Red)); }
+            catch (Exception e)
+            {
+                await ReplyAsync("", embed: ChatUtils.CreateEmbed("Temp-chan", e.Message, Color.Red));
+                await _logger.Log(new(LogSeverity.Error, "TempChan", e.Message, e));
+            }
             finally
             {
                 await (initMessage?.DeleteAsync() ?? Task.CompletedTask);

@@ -34,9 +34,7 @@ namespace Assembly_Bot
                     if (_lastUpdate.AddHours(2) <= DateTime.Now)
                     {
                         _lastUpdate = DateTime.Now;
-#if !DEBUG
                         await _edt.ReloadEdt();
-#endif
                     }
                     foreach (var edt in _edt.edts) //TODO: Tasks ?
                     {
@@ -90,7 +88,7 @@ namespace Assembly_Bot
 
         public async Task GroupChatToClean(SocketUser user, SocketVoiceState oldVoiceState, SocketVoiceState newVoiceState)
         {
-            if (newVoiceState.VoiceChannel != null
+            if (newVoiceState.VoiceChannel is not null
                 && (newVoiceState.VoiceChannel.Guild.Id == Apsu.server.Id || newVoiceState.VoiceChannel.Guild.Id == Sandbox.server.Id))
             // Just activate this functionality on the APSU and my test server
             {
@@ -98,17 +96,17 @@ namespace Assembly_Bot
                 if (newVoiceState.VoiceChannel.Name.StartsWith("VocalABot"))
                 {
                     var channel = newVoiceState.VoiceChannel.Guild.TextChannels.First(chan => string.Equals(chan.Name, newVoiceState.VoiceChannel.Name, StringComparison.OrdinalIgnoreCase));
-                    await channel.AddPermissionOverwriteAsync(user, new OverwritePermissions(viewChannel: PermValue.Allow));
+                    await channel.AddPermissionOverwriteAsync(user, new(viewChannel: PermValue.Allow));
                 }
 #else
                 if (newVoiceState.VoiceChannel.Name.StartsWith("Duo") || newVoiceState.VoiceChannel.Name.StartsWith("Trio") || newVoiceState.VoiceChannel.Name.StartsWith("Quatuor"))
                 {
                     var channel = newVoiceState.VoiceChannel.Guild.TextChannels.First(chan => string.Equals(chan.Name, newVoiceState.VoiceChannel.Name, StringComparison.OrdinalIgnoreCase));
-                    await channel.AddPermissionOverwriteAsync(user, new OverwritePermissions(viewChannel: PermValue.Allow));
+                    await channel.AddPermissionOverwriteAsync(user, new(viewChannel: PermValue.Allow));
                 }
 #endif
             }
-            if (oldVoiceState.VoiceChannel != null
+            if (oldVoiceState.VoiceChannel is not null
                 && (oldVoiceState.VoiceChannel.Guild.Id == Apsu.server.Id || oldVoiceState.VoiceChannel.Guild.Id == Sandbox.server.Id))
             // Just activate this functionality on the APSU and my test server
             {
@@ -119,7 +117,7 @@ namespace Assembly_Bot
                     await channel.RemovePermissionOverwriteAsync(user);
 
                     if (oldVoiceState.VoiceChannel.Users.Count == 0)
-                        while (await channel.GetMessagesAsync(1).FlattenAsync() != null)
+                        while (await channel.GetMessagesAsync(1).FlattenAsync() is not null)
                             await ChatUtils.CleanChannel(channel, 1);
                 }
 #else
@@ -129,7 +127,7 @@ namespace Assembly_Bot
                     await channel.RemovePermissionOverwriteAsync(user);
 
                     if (oldVoiceState.VoiceChannel.Users.Count == 0)
-                        while (await channel.GetMessageAsync(1) != null)
+                        while (await channel.GetMessageAsync(1) is not null)
                             await ChatUtils.CleanChannel(channel, 100);
                 }
 #endif
@@ -138,7 +136,7 @@ namespace Assembly_Bot
 
         internal async Task ClearTempChans(SocketVoiceChannel vchannel)
         {
-            if (vchannel != null && vchannel.Category.Name.StartsWith("tmp-") && vchannel.Users.Count == 0)
+            if (vchannel is not null && vchannel.Category.Name.StartsWith("tmp-") && vchannel.Users.Count == 0)
             {
                 // Delete text channel
                 await vchannel.Guild.TextChannels.First(chan => string.Equals(chan.Name, vchannel.Name, StringComparison.OrdinalIgnoreCase)).DeleteAsync();

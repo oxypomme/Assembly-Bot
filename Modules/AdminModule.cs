@@ -34,14 +34,12 @@ namespace Assembly_Bot.Modules
         {
             SocketVoiceChannel channel = Context.Guild.GetVoiceChannel(vid);
             if (vid == 0)
-            {
-                foreach (SocketVoiceChannel vchat in Context.Guild.VoiceChannels)
+                foreach (var vchat in Context.Guild.VoiceChannels)
                     if (vchat.Users.Contains(Context.User))
                     {
                         channel = vchat;
                         break;
                     }
-            }
 
             foreach (var vuser in channel.Users)
                 await vuser.ModifyAsync((user) => user.Mute = true);

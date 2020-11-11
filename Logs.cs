@@ -45,7 +45,7 @@ namespace Assembly_Bot
                     break;
             }
             Console.Write($"{DateTime.Now,-19} [{message.Severity}] {message.Source}: {message.Message}");
-            if (message.Exception != null)
+            if (message.Exception is not null)
                 Console.Write(" " + message.Exception.StackTrace);
             Console.WriteLine();
             if (_client.ConnectionState == ConnectionState.Connected && message.Severity < LogSeverity.Info)

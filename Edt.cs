@@ -80,7 +80,7 @@ namespace Assembly_Bot
                             if (isEdtDownloaded) //TODO: force upload
                             {
                                 // Send it to the correct channel
-                                if (_edtMessages[i] != null)
+                                if (_edtMessages[i] is not null)
                                     await _edtMessages[i].DeleteAsync();
 #if DEBUG
                                 else
@@ -98,9 +98,10 @@ namespace Assembly_Bot
                                         {
                                             Title = ":date: Groupe 3." + (i + 1),
                                             Description = $"Semaine du {DateTime.Today.AddDays(offset * 7).StartOfWeek(DayOfWeek.Monday):dd/MM} au {DateTime.Today.AddDays(offset * 7).EndOfWeek(DayOfWeek.Monday):dd/MM}.",
-                                            Fields = new List<EmbedFieldBuilder>() {
-                                                new EmbedFieldBuilder() { IsInline = true, Name="Généré", Value = "par [Wildgoat#6969](https://github.com/WildGoat07)" },
-                                                new EmbedFieldBuilder() { IsInline = true, Name="avec :hearts:", Value = imgGeneretadApi != "" ? $"[Lien direct]({imgGeneretadApi})" : ":hearts:" }
+                                            Fields = new()
+                                            {
+                                                new() { IsInline = true, Name = "Généré", Value = "par [Wildgoat#6969](https://github.com/WildGoat07)" },
+                                                new() { IsInline = true, Name = "avec :hearts:", Value = imgGeneretadApi != "" ? $"[Lien direct]({imgGeneretadApi})" : ":hearts:" }
                                             },
                                             ImageUrl = $"attachment://{code}.png"
                                         }

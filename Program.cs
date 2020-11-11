@@ -55,7 +55,7 @@ namespace Assembly_Bot
                 _client.Ready += async () =>
                 {
                     // Log that we're ready
-                    await _loggger.Log(new LogMessage(LogSeverity.Info, "Ready", $"Connected as {_client.CurrentUser} on {_client.Guilds.Count} servers"));
+                    await _loggger.Log(new(LogSeverity.Info, "Ready", $"Connected as {_client.CurrentUser} on {_client.Guilds.Count} servers"));
 
 #if !DEBUG
                     if (_isFirstTimeReady)
@@ -91,7 +91,7 @@ namespace Assembly_Bot
                         // [Specific APSU] Setup the cleaner for work channels
                         await services.GetRequiredService<Behaviour>().GroupChatToClean(user, oldVoiceState, newVoiceState);
                     }
-                    catch (Exception ex) { await services.GetRequiredService<Logs>().Log(new LogMessage(LogSeverity.Error, "VoiceStateUpdated", ex.Message, ex)); }
+                    catch (Exception ex) { await services.GetRequiredService<Logs>().Log(new(LogSeverity.Error, "VoiceStateUpdated", ex.Message, ex)); }
                 };
 
                 // Setup a Timer
@@ -110,14 +110,14 @@ namespace Assembly_Bot
                         // [Specific APSU] The alerts
                         services.GetRequiredService<Behaviour>().AlertStudents(sender, e);
                     }
-                    catch (Exception ex) { await services.GetRequiredService<Logs>().Log(new LogMessage(LogSeverity.Error, "TimerElapsed", ex.Message, ex)); }
+                    catch (Exception ex) { await services.GetRequiredService<Logs>().Log(new(LogSeverity.Error, "TimerElapsed", ex.Message, ex)); }
                 };
                 _timer.AutoReset = true;
                 _timer.Enabled = true;
 
                 await Task.Delay(-1);
             }
-            catch (Exception e) { await _loggger.Log(new LogMessage(LogSeverity.Error, "InstallCommands", e.Message, e)); }
+            catch (Exception e) { await _loggger.Log(new(LogSeverity.Error, "InstallCommands", e.Message, e)); }
         }
     }
 }

@@ -29,8 +29,8 @@ namespace Assembly_Bot.Modules
                                               select (module, builder))
             {
                 //... foreach command in module, check if it doesn't exist in help yet. If it doesn't, create an entry
-                foreach (var cmd in module.Commands.Where(cmd => builder.Value == null || !(builder.Value as string).Contains(cmd.Name)))
-                    builder.Value += (builder.Value == null ? "" : ", ") + "`" + cmd.Name + "`";
+                foreach (var cmd in module.Commands.Where(cmd => builder.Value is null || !(builder.Value as string).Contains(cmd.Name)))
+                    builder.Value += (builder.Value is null ? "" : ", ") + "`" + cmd.Name + "`";
                 fields.Add(builder);
             }
 
