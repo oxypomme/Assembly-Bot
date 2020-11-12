@@ -19,7 +19,7 @@ namespace Assembly_Bot.Modules
         {
             var embed = new EmbedBuilder();
             embed.WithDescription("Role ID : " + role.Id + Environment.NewLine + "Role Name : " + role.Name + Environment.NewLine + "Role Mention : " + role.Mention + Environment.NewLine + "Role Mention : " + role.Mention + Environment.NewLine + "Role Color : " + role.Color.ToString() + Environment.NewLine + "Role Created at : " + role.CreatedAt);
-            await Context.Channel.SendMessageAsync("", embed: embed.Build());
+            await Context.Channel.SendMessageAsync(embed: embed.Build());
         }
     }
 }

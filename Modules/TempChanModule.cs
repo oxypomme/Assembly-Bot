@@ -42,7 +42,7 @@ namespace Assembly_Bot.Modules
 
                 initMessage = await ReplyAsync(embed: ChatUtils.CreateEmbed("Temp-chan", "J'arrive ! `(\\*>﹏<\\*)′", Color.Purple));
                 string categName = "tmp-" + name;
-                if (name == "")
+                if (name?.Length == 0)
                     do
                     {
                         var rnd = new Random();
@@ -79,7 +79,8 @@ namespace Assembly_Bot.Modules
                 {
                     if (user != Context.User)
                         await categ.AddPermissionOverwriteAsync(user, new(viewChannel: PermValue.Allow));
-                    await user.ModifyAsync(u => u.Channel = vChan);
+                    if (user.VoiceChannel.Guild == Context.Guild)
+                        await user.ModifyAsync(u => u.Channel = vChan);
                     userEmbed[1].WithValue(userEmbed[1].Value + (userEmbed[1].Value is not null ? ", " : "") + user.Mention);
                 }
                 if (maxUsers > 0)
@@ -258,7 +259,8 @@ namespace Assembly_Bot.Modules
                 {
                     if (user != Context.User)
                         await chan.Category.AddPermissionOverwriteAsync(user, new(viewChannel: PermValue.Allow));
-                    await user.ModifyAsync(u => u.Channel = (SocketVoiceChannel)((SocketCategoryChannel)chan.Category).Channels.First(c => c is SocketVoiceChannel vc && string.Equals(vc.Name, chan.Name, StringComparison.OrdinalIgnoreCase)));
+                    if (user.VoiceChannel.Guild == Context.Guild)
+                        await user.ModifyAsync(u => u.Channel = (SocketVoiceChannel)((SocketCategoryChannel)chan.Category).Channels.First(c => c is SocketVoiceChannel vc && string.Equals(vc.Name, chan.Name, StringComparison.OrdinalIgnoreCase)));
                     userEmbed[1].WithValue(userEmbed[1].Value + (userEmbed[1].Value is not null ? ", " : "") + user.Mention);
                 }
 
@@ -291,7 +293,10 @@ namespace Assembly_Bot.Modules
                     throw new AccessViolationException("Ptdr t ki");
 
                 await chan.Category.AddPermissionOverwriteAsync(user, new(viewChannel: PermValue.Deny));
-                await user.ModifyAsync(u => u.Channel = null);
+                if (user.VoiceChannel.Guild == Context.Guild && user.VoiceChannel == ((SocketCategoryChannel)chan.Category).Channels.First(c => string.Equals(c.Name, chan.Name, StringComparison.OrdinalIgnoreCase)))
+                    await user.ModifyAsync(u => u.Channel = null);
+                else
+                    throw new AccessViolationException("Dude, tu veux kick un mec qui est pas avec toi duh");
             }
             catch (Exception e)
             {
