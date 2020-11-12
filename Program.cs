@@ -17,11 +17,11 @@ namespace Assembly_Bot
 {
     public class Program
     {
+        public static readonly TimeSpan Timeout = TimeSpan.FromSeconds(15);
         public static ServiceProvider services;
 
-        public static readonly TimeSpan Timeout = TimeSpan.FromSeconds(15);
-
         private DiscordSocketClient _client;
+        private Logs _loggger;
         private System.Timers.Timer _timer;
 
         public Program()
@@ -31,29 +31,31 @@ namespace Assembly_Bot
         // Starting the program in async
         public static void Main(string[] args) => new Program().MainAsync().GetAwaiter().GetResult();
 
-        private bool _isFirstTimeReady;
+        private bool _isFirstTimeReady = true;
 
         public async Task MainAsync()
         {
             try
             {
                 // Setup services
+                _client = new DiscordSocketClient();
                 services = new ServiceCollection()
-                    .AddSingleton<DiscordSocketClient>()
+                    .AddSingleton(_client)
                     .AddSingleton<CommandService>()
                     .AddSingleton<CommandHandler>()
                     .AddSingleton<Logs>()
                     .AddSingleton<Behaviour>()
+                    .AddSingleton<Edt>()
                     .BuildServiceProvider();
-                _client = services.GetRequiredService<DiscordSocketClient>();
+                _loggger = services.GetRequiredService<Logs>();
 
-                _client.Log += services.GetRequiredService<Logs>().Log;
-                services.GetRequiredService<CommandService>().Log += services.GetRequiredService<Logs>().Log;
+                _client.Log += _loggger.Log;
+                services.GetRequiredService<CommandService>().Log += _loggger.Log;
 
                 _client.Ready += async () =>
                 {
                     // Log that we're ready
-                    await services.GetRequiredService<Logs>().Log(new LogMessage(LogSeverity.Info, "Ready", $"Connected as {_client.CurrentUser} on {_client.Guilds.Count} servers"));
+                    await _loggger.Log(new(LogSeverity.Info, "Ready", $"Connected as {_client.CurrentUser} on {_client.Guilds.Count} servers"));
 
 #if !DEBUG
                     if (_isFirstTimeReady)
@@ -84,10 +86,12 @@ namespace Assembly_Bot
                 {
                     try
                     {
+                        // Clear any empty temporary channel
+                        await services.GetRequiredService<Behaviour>().ClearTempChans(oldVoiceState.VoiceChannel);
                         // [Specific APSU] Setup the cleaner for work channels
                         await services.GetRequiredService<Behaviour>().GroupChatToClean(user, oldVoiceState, newVoiceState);
                     }
-                    catch (Exception ex) { await services.GetRequiredService<Logs>().Log(new LogMessage(LogSeverity.Error, "VoiceStateUpdated", ex.Message, ex)); }
+                    catch (Exception ex) { await services.GetRequiredService<Logs>().Log(new(LogSeverity.Error, "VoiceStateUpdated", ex.Message, ex)); }
                 };
 
                 // Setup a Timer
@@ -106,14 +110,14 @@ namespace Assembly_Bot
                         // [Specific APSU] The alerts
                         services.GetRequiredService<Behaviour>().AlertStudents(sender, e);
                     }
-                    catch (Exception ex) { await services.GetRequiredService<Logs>().Log(new LogMessage(LogSeverity.Error, "TimerElapsed", ex.Message, ex)); }
+                    catch (Exception ex) { await services.GetRequiredService<Logs>().Log(new(LogSeverity.Error, "TimerElapsed", ex.Message, ex)); }
                 };
                 _timer.AutoReset = true;
                 _timer.Enabled = true;
 
                 await Task.Delay(-1);
             }
-            catch (Exception e) { await services.GetRequiredService<Logs>().Log(new LogMessage(LogSeverity.Error, "InstallCommands", e.Message, e)); }
+            catch (Exception e) { await _loggger.Log(new(LogSeverity.Error, "InstallCommands", e.Message, e)); }
         }
     }
 }

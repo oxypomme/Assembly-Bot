@@ -22,7 +22,7 @@ namespace Assembly_Bot
         [RequireBotPermission(ChannelPermission.SendMessages)]
         public static async Task PingMessage(ISocketMessageChannel channel, string message, IMentionable mentionable = null)
         {
-            if (mentionable == null)
+            if (mentionable is null)
                 await channel.SendMessageAsync("@here : " + message);
             else
                 await channel.SendMessageAsync(mentionable + " : " + message);
@@ -44,7 +44,7 @@ namespace Assembly_Bot
                 Color = color,
                 Footer = new EmbedFooterBuilder() { Text = "by OxyTom#1831", IconUrl = "https://avatars3.githubusercontent.com/u/34627360?u=2e1dd6031fa2703dfd3f16700c978c85559e2e5f" }
             }.WithAuthor(Program.services.GetRequiredService<DiscordSocketClient>().CurrentUser);
-            if (fields != null)
+            if (fields is not null)
                 foreach (var field in fields)
                     builder.AddField(field);
             return builder.Build();

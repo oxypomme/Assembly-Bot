@@ -10,6 +10,13 @@ namespace Assembly_Bot
 {
     public class Logs
     {
+        private DiscordSocketClient _client;
+
+        public Logs(IServiceProvider services)
+        {
+            _client = services.GetRequiredService<DiscordSocketClient>();
+        }
+
         public async Task Log(LogMessage message)
         {
             Color color = Color.Default;
@@ -38,11 +45,11 @@ namespace Assembly_Bot
                     break;
             }
             Console.Write($"{DateTime.Now,-19} [{message.Severity}] {message.Source}: {message.Message}");
-            if (message.Exception != null)
+            if (message.Exception is not null)
                 Console.Write(" " + message.Exception.StackTrace);
             Console.WriteLine();
-            if (Program.services.GetRequiredService<DiscordSocketClient>().ConnectionState == ConnectionState.Connected && message.Severity < LogSeverity.Info)
-                await LogOnDiscord("Something went wrong", "*" + message.Source + "*\n" + message.Message, color, isImportant: isImp).ConfigureAwait(true);
+            if (_client.ConnectionState == ConnectionState.Connected && message.Severity < LogSeverity.Info)
+                await LogOnDiscord("Something went wrong", "*" + message.Source + "*\n" + message.Message, color, isImportant: isImp);
             Console.ResetColor();
         }
 

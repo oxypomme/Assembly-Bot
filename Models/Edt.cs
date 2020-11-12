@@ -17,22 +17,22 @@ namespace Assembly_Bot.Models
         public int RawJsonCode { get; set; }
     }
 
-    public class Week
+    public record Week
     {
         [JsonPropertyName("days")]
-        public List<Day> Days { get; set; }
+        public List<Day> Days { get; init; }
     }
 
-    public class Day
+    public record Day
     {
         [JsonPropertyName("events")]
-        public List<Event> Events { get; set; }
+        public List<Event> Events { get; init; }
     }
 
-    public class Event
+    public record Event()
     {
         [JsonPropertyName("summary")]
-        public string Summary { get; set; }
+        public string Summary { get; init; }
 
         public string dtstart;
 
@@ -43,7 +43,7 @@ namespace Assembly_Bot.Models
             {
                 return DateTime.ParseExact(dtstart, "yyyyMMddTHHmmss", null);
             }
-            set => dtstart = value.ToString("yyyyMMddTHHmmss");
+            init => dtstart = value.ToString("yyyyMMddTHHmmss");
         }
 
         public string dtend;
@@ -55,21 +55,18 @@ namespace Assembly_Bot.Models
             {
                 return DateTime.ParseExact(dtend, "yyyyMMddTHHmmss", null);
             }
-            set => dtend = value.ToString("yyyyMMddTHHmmss");
+            init => dtend = value.ToString("yyyyMMddTHHmmss");
         }
 
         [JsonPropertyName("location")]
-        public string Location { get; set; }
+        public string Location { get; init; }
 
         [JsonPropertyName("description")]
-        public string Description { get; set; }
+        public string Description { get; init; }
 
         [JsonPropertyName("transp")]
-        public string Transp { get; set; }
+        public string Transp { get; init; }
 
-        public override string ToString()
-        {
-            return Summary + " @" + Dtstart + " -> " + Dtend;
-        }
+        public override string ToString() => Summary + " @" + Dtstart + " -> " + Dtend;
     }
 }
