@@ -34,7 +34,7 @@ namespace Assembly_Bot.Modules
                 fields.Add(builder);
             }
 
-            await ReplyAsync("", embed: ChatUtils.CreateEmbed("Help !", $"Prefix : `{CommandHandler.prefix}`\nFor more info about a command : `help [command]`", Color.DarkBlue, fields));
+            await ReplyAsync(embed: ChatUtils.CreateEmbed("Help !", $"Prefix : `{CommandHandler.prefix}`\nFor more info about a command : `help [command]`", Color.DarkBlue, fields));
         }
 
         [Command("help")]
@@ -47,7 +47,7 @@ namespace Assembly_Bot.Modules
                 commands = commands.Where(c => string.Equals(c.Name, commandName, StringComparison.OrdinalIgnoreCase) || c.Aliases.Any(a => a.Contains(commandName, StringComparison.OrdinalIgnoreCase)));
             if (!commands.Any())
             {
-                var errorMessage = await ReplyAsync("", embed: ChatUtils.CreateEmbed("", "There are no commands with that name.", Color.DarkBlue));
+                var errorMessage = await ReplyAsync(embed: ChatUtils.CreateEmbed("", "There are no commands with that name.", Color.DarkBlue));
                 await Task.Delay(5000); // 5 seconds
                 await errorMessage.DeleteAsync();
                 return;
@@ -67,7 +67,7 @@ namespace Assembly_Bot.Modules
                         (cmd.Parameters.Count() > 0 ? "__Parameters :__ " + string.Concat(cmd.Parameters.Select(p => "\n[" + p.Name + "] : *" + (p.Summary ?? "No description available") + "*")) + "\n" : "") + ""
                         : ""));
             }
-            await ReplyAsync("", embed: ChatUtils.CreateEmbed(embedBuilder));
+            await ReplyAsync(embed: ChatUtils.CreateEmbed(embedBuilder));
         }
     }
 }
