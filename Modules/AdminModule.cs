@@ -47,7 +47,7 @@ namespace Assembly_Bot.Modules
                     throw new ArgumentException("Je vous ai pas trouvé, déso pas déso");
             }
             await channel.AddPermissionOverwriteAsync(Context.Guild.EveryoneRole, new(speak: PermValue.Deny));
-            foreach (var vuser in channel.Users)
+            foreach (var vuser in channel.Users.Where(u => !u.IsMuted))
                 await vuser.ModifyAsync((user) => user.Mute = true);
 
             var msg = await ReplyAsync($"{channel.Name} is now muted for {secs} seconds.");
@@ -55,7 +55,7 @@ namespace Assembly_Bot.Modules
 
             await Task.Delay(secs * 1000);
             await channel.AddPermissionOverwriteAsync(Context.Guild.EveryoneRole, new(speak: PermValue.Allow));
-            foreach (var vuser in channel.Users)
+            foreach (var vuser in channel.Users.Where(u => u.IsMuted))
                 await vuser.ModifyAsync((user) => user.Mute = false);
 
             const int delay = 5000;

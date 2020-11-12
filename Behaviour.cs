@@ -113,7 +113,7 @@ namespace Assembly_Bot
                 && (oldVoiceState.VoiceChannel.Guild.Id == Apsu.server.Id || oldVoiceState.VoiceChannel.Guild.Id == Sandbox.server.Id))
             // Just activate this functionality on the APSU and my test server
             {
-#if !DEBUG
+#if DEBUG
                 if (oldVoiceState.VoiceChannel.Name.StartsWith("VocalABot"))
                 {
                     var channel = oldVoiceState.VoiceChannel.Guild.TextChannels.First(chan => string.Equals(chan.Name, oldVoiceState.VoiceChannel.Name, StringComparison.OrdinalIgnoreCase));
