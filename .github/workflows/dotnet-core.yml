@@ -6,24 +6,24 @@ on:
 
 jobs:
   build:
-    name: dotnet build
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v2
-    - name: Setup .NET Core
-      uses: actions/setup-dotnet@v1
-      with:
-        dotnet-version: 5.0
-    - name: Install dependencies
-      run: dotnet restore
-    - name: Build
-      run: dotnet build --configuration Release --no-restore
+  #  name: dotnet build
+  #  runs-on: ubuntu-latest
+  #  steps:
+  #  - uses: actions/checkout@v2
+  #  - name: Setup .NET Core
+  #    uses: actions/setup-dotnet@v1
+  #    with:
+  #      dotnet-version: 5.0
+  #  - name: Install dependencies
+  #    run: dotnet restore
+  #  - name: Build
+  #    run: dotnet build --configuration Release --no-restore
     #- name: Test
     #  run: dotnet test --no-restore --verbosity normal
-  publish:
+  #publish:
     name: ssh pull, build and run
     runs-on: ubuntu-latest
-    needs: [build]
+  #  needs: [build]
     steps:
     - name: Kill bot
       uses: appleboy/ssh-action@master
