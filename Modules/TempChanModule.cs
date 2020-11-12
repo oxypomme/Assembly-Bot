@@ -40,7 +40,7 @@ namespace Assembly_Bot.Modules
             {
                 var userList = new HashSet<SocketGuildUser>(users);
 
-                initMessage = await ReplyAsync("", embed: ChatUtils.CreateEmbed("Temp-chan", "J'arrive ! `(\\*>﹏<\\*)′", Color.Purple));
+                initMessage = await ReplyAsync(embed: ChatUtils.CreateEmbed("Temp-chan", "J'arrive ! `(\\*>﹏<\\*)′", Color.Purple));
                 string categName = "tmp-" + name;
                 if (name == "")
                     do
@@ -55,6 +55,7 @@ namespace Assembly_Bot.Modules
                     userList.Add((SocketGuildUser)Context.User);
 
                 categ = await Context.Guild.CreateCategoryChannelAsync(categName);
+                await categ.AddPermissionOverwriteAsync(Context.Guild.EveryoneRole, new(viewChannel: PermValue.Deny));
                 await categ.AddPermissionOverwriteAsync(Context.User, new(manageChannel: PermValue.Allow, manageMessages: PermValue.Allow, muteMembers: PermValue.Allow, deafenMembers: PermValue.Allow));
 
                 tChan = await Context.Guild.CreateTextChannelAsync(name, c =>
@@ -76,17 +77,18 @@ namespace Assembly_Bot.Modules
                 };
                 foreach (var user in userList)
                 {
-                    await categ.AddPermissionOverwriteAsync(user, new(viewChannel: PermValue.Allow));
+                    if (user != Context.User)
+                        await categ.AddPermissionOverwriteAsync(user, new(viewChannel: PermValue.Allow));
                     await user.ModifyAsync(u => u.Channel = vChan);
                     userEmbed[1].WithValue(userEmbed[1].Value + (userEmbed[1].Value is not null ? ", " : "") + user.Mention);
                 }
                 if (maxUsers > 0)
                     userEmbed.Add(new() { Name = "Maximum", Value = maxUsers, IsInline = true });
-                await ReplyAsync("", embed: ChatUtils.CreateEmbed("Temp-chan", "Houra ! Vous êtes dans votre salon ! o(\\*^＠^\\*)o", Color.Green, userEmbed));
+                await ReplyAsync(embed: ChatUtils.CreateEmbed("Temp-chan", "Houra ! Vous êtes dans votre salon ! o(\\*^＠^\\*)o", Color.Green, userEmbed));
             }
             catch (System.Data.DuplicateNameException e)
             {
-                await ReplyAsync("", embed: ChatUtils.CreateEmbed("Temp-chan", e.Message, Color.Red));
+                await ReplyAsync(embed: ChatUtils.CreateEmbed("Temp-chan", e.Message, Color.Red));
             }
             catch (Exception e)
             {
@@ -99,7 +101,7 @@ namespace Assembly_Bot.Modules
                 catch (Exception ex) { await _logger.Log(new(LogSeverity.Error, "TempChan - Cleanup", e.Message, ex)); }
                 finally
                 {
-                    await ReplyAsync("", embed: ChatUtils.CreateEmbed("Temp-chan", "OOPS, quelque chose est arrivé .·´¯\\`(>▂<)´¯\\`·. ", Color.Red));
+                    await ReplyAsync(embed: ChatUtils.CreateEmbed("Temp-chan", "OOPS, quelque chose est arrivé .·´¯\\`(>▂<)´¯\\`·. ", Color.Red));
                     await _logger.Log(new(LogSeverity.Error, "TempChan", e.Message, e));
                 }
             }
@@ -118,7 +120,7 @@ namespace Assembly_Bot.Modules
             IUserMessage initMessage = null;
             try
             {
-                initMessage = await ReplyAsync("", embed: ChatUtils.CreateEmbed("Temp-chan", "J'arrive ! `(\\*>﹏<\\*)′", Color.Purple));
+                initMessage = await ReplyAsync(embed: ChatUtils.CreateEmbed("Temp-chan", "J'arrive ! `(\\*>﹏<\\*)′", Color.Purple));
                 SocketGuildChannel toDel = Context.Guild.GetCategoryChannel(id);
                 if (toDel == null)
                     toDel = Context.Guild.GetChannel(id);
@@ -138,13 +140,13 @@ namespace Assembly_Bot.Modules
                 await _behave.ClearTempChans(channel);
 
                 const int delay = 5000;
-                var msg = await ReplyAsync("", embed: ChatUtils.CreateEmbed("Temp-chan", $"J'ai nettoyé `{channel.Name}` ! (✿◡‿◡)", Color.Green));
+                var msg = await ReplyAsync(embed: ChatUtils.CreateEmbed("Temp-chan", $"J'ai nettoyé `{channel.Name}` ! (✿◡‿◡)", Color.Green));
                 await Task.Delay(delay);
                 await msg.DeleteAsync();
             }
             catch (Exception e)
             {
-                await ReplyAsync("", embed: ChatUtils.CreateEmbed("Temp-chan", e.Message, Color.Red));
+                await ReplyAsync(embed: ChatUtils.CreateEmbed("Temp-chan", e.Message, Color.Red));
                 await _logger.Log(new(LogSeverity.Error, "TempChan", e.Message, e));
             }
             finally
@@ -162,7 +164,7 @@ namespace Assembly_Bot.Modules
             IUserMessage initMessage = null;
             try
             {
-                initMessage = await ReplyAsync("", embed: ChatUtils.CreateEmbed("Temp-chan", "J'arrive ! `(\\*>﹏<\\*)′", Color.Purple));
+                initMessage = await ReplyAsync(embed: ChatUtils.CreateEmbed("Temp-chan", "J'arrive ! `(\\*>﹏<\\*)′", Color.Purple));
                 SocketCategoryChannel category = null;
                 foreach (var cat in Context.Guild.CategoryChannels)
                     if (cat.Name.StartsWith("tmp-") && cat.Name.Contains(name, StringComparison.OrdinalIgnoreCase))
@@ -175,13 +177,13 @@ namespace Assembly_Bot.Modules
                 await _behave.ClearTempChans(category.Channels.First(c => c is SocketVoiceChannel) as SocketVoiceChannel);
 
                 const int delay = 5000;
-                var msg = await ReplyAsync("", embed: ChatUtils.CreateEmbed("Temp-chan", $"J'ai nettoyé `{name}` ! (✿◡‿◡)", Color.Green));
+                var msg = await ReplyAsync(embed: ChatUtils.CreateEmbed("Temp-chan", $"J'ai nettoyé `{name}` ! (✿◡‿◡)", Color.Green));
                 await Task.Delay(delay);
                 await msg.DeleteAsync();
             }
             catch (Exception e)
             {
-                await ReplyAsync("", embed: ChatUtils.CreateEmbed("Temp-chan", e.Message, Color.Red));
+                await ReplyAsync(embed: ChatUtils.CreateEmbed("Temp-chan", e.Message, Color.Red));
                 await _logger.Log(new(LogSeverity.Error, "TempChan", e.Message, e));
             }
             finally
@@ -200,7 +202,7 @@ namespace Assembly_Bot.Modules
             IUserMessage initMessage = null;
             try
             {
-                initMessage = await ReplyAsync("", embed: ChatUtils.CreateEmbed("Temp-chan", "J'arrive ! `(\\*>﹏<\\*)′", Color.Purple));
+                initMessage = await ReplyAsync(embed: ChatUtils.CreateEmbed("Temp-chan", "J'arrive ! `(\\*>﹏<\\*)′", Color.Purple));
                 foreach (var chan in from categ in Context.Guild.CategoryChannels
                                      where categ.Name.StartsWith("tmp-")
                                      from chan in categ.Channels
@@ -209,13 +211,13 @@ namespace Assembly_Bot.Modules
                     await _behave.ClearTempChans((SocketVoiceChannel)chan);
 
                 const int delay = 5000;
-                var msg = await ReplyAsync("", embed: ChatUtils.CreateEmbed("Temp-chan", "C'est tout beau tout propre ! (✿◡‿◡)", Color.Green));
+                var msg = await ReplyAsync(embed: ChatUtils.CreateEmbed("Temp-chan", "C'est tout beau tout propre ! (✿◡‿◡)", Color.Green));
                 await Task.Delay(delay);
                 await msg.DeleteAsync();
             }
             catch (Exception e)
             {
-                await ReplyAsync("", embed: ChatUtils.CreateEmbed("Temp-chan", e.Message, Color.Red));
+                await ReplyAsync(embed: ChatUtils.CreateEmbed("Temp-chan", e.Message, Color.Red));
                 await _logger.Log(new(LogSeverity.Error, "TempChan", e.Message, e));
             }
             finally
@@ -225,18 +227,82 @@ namespace Assembly_Bot.Modules
             }
         }
 
+        private bool CheckIfContextUserIsAdmin(out SocketTextChannel channel)
+        {
+            channel = null;
+            foreach (var chan in Context.Guild.VoiceChannels.Where(chan => chan.Users.Contains(Context.User)))
+            {
+                channel = Context.Guild.TextChannels.First(c => string.Equals(c.Name, chan.Name, StringComparison.OrdinalIgnoreCase));
+                break;
+            }
+
+            if (channel is null)
+                throw new KeyNotFoundException("T ou konnar");
+
+            return channel.PermissionOverwrites.Any(perm => perm.TargetId == Context.User.Id && perm.Permissions.ManageChannel == PermValue.Allow);
+        }
+
         [Command("add")]
         [Summary("Ask Temp-chan to add users your private channel")]
         public async Task AddPrivAsync([Summary("The users to invite with you")] params SocketGuildUser[] users)
         {
-            //TODO: check if Context.User is "Admin"
+            IUserMessage initMessage = null;
+            try
+            {
+                initMessage = await ReplyAsync(embed: ChatUtils.CreateEmbed("Temp-chan", "J'arrive ! `(\\*>﹏<\\*)′", Color.Purple));
+                SocketTextChannel chan = null;
+                if (!CheckIfContextUserIsAdmin(out chan))
+                    throw new AccessViolationException("Ptdr t ki");
+                var userEmbed = new List<EmbedFieldBuilder>() { new() { Name = "Membres ajoutés :" } };
+                foreach (var user in users)
+                {
+                    if (user != Context.User)
+                        await chan.Category.AddPermissionOverwriteAsync(user, new(viewChannel: PermValue.Allow));
+                    await user.ModifyAsync(u => u.Channel = (SocketVoiceChannel)((SocketCategoryChannel)chan.Category).Channels.First(c => c is SocketVoiceChannel vc && string.Equals(vc.Name, chan.Name, StringComparison.OrdinalIgnoreCase)));
+                    userEmbed[1].WithValue(userEmbed[1].Value + (userEmbed[1].Value is not null ? ", " : "") + user.Mention);
+                }
+
+                await ReplyAsync(embed: ChatUtils.CreateEmbed("Temp-chan", "Houra ! Les invités sont arrivés !", Color.Green, userEmbed));
+            }
+            catch (Exception e)
+            {
+                await ReplyAsync(embed: ChatUtils.CreateEmbed("Temp-chan", e.Message, Color.Red));
+                await _logger.Log(new(LogSeverity.Error, "TempChan", e.Message, e));
+            }
+            finally
+            {
+                await (initMessage?.DeleteAsync() ?? Task.CompletedTask);
+                await Context.Message.DeleteAsync();
+            }
         }
 
         [Command("kick")]
         [Summary("Ask Temp-chan to kick an user from your private channel")]
         public async Task KickPrivAsync([Summary("The user to kick")] SocketGuildUser user)
         {
-            //TODO: check if Context.User is "Admin"
+            IUserMessage initMessage = null;
+            try
+            {
+                initMessage = await ReplyAsync(embed: ChatUtils.CreateEmbed("Temp-chan", "J'arrive ! `(\\*>﹏<\\*)′", Color.Purple));
+                if (user == Context.User)
+                    throw new ArgumentException("Pourquoi tu veut te kick ?");
+                SocketTextChannel chan = null;
+                if (!CheckIfContextUserIsAdmin(out chan))
+                    throw new AccessViolationException("Ptdr t ki");
+
+                await chan.Category.AddPermissionOverwriteAsync(user, new(viewChannel: PermValue.Deny));
+                await user.ModifyAsync(u => u.Channel = null);
+            }
+            catch (Exception e)
+            {
+                await ReplyAsync(embed: ChatUtils.CreateEmbed("Temp-chan", e.Message, Color.Red));
+                await _logger.Log(new(LogSeverity.Error, "TempChan", e.Message, e));
+            }
+            finally
+            {
+                await (initMessage?.DeleteAsync() ?? Task.CompletedTask);
+                await Context.Message.DeleteAsync();
+            }
         }
 
         [Command("edit")]
@@ -245,7 +311,26 @@ namespace Assembly_Bot.Modules
             [Summary("The new name of the channel")] string name = "",
             [Summary("The new max user of the channel")] int maxUsers = 0)
         {
-            //TODO: check if Context.User is "Admin"
+            IUserMessage initMessage = null;
+            try
+            {
+                initMessage = await ReplyAsync(embed: ChatUtils.CreateEmbed("Temp-chan", "J'arrive ! `(\\*>﹏<\\*)′", Color.Purple));
+                SocketTextChannel chan = null;
+                if (!CheckIfContextUserIsAdmin(out chan))
+                    throw new AccessViolationException("Ptdr t ki");
+                await chan.Category.ModifyAsync(cat => cat.Name = "tmp-" + name);
+                await ((SocketVoiceChannel)((SocketCategoryChannel)chan.Category).Channels.First(c => c is SocketVoiceChannel vc && string.Equals(vc.Name, chan.Name, StringComparison.OrdinalIgnoreCase))).ModifyAsync(c => c.UserLimit = maxUsers);
+            }
+            catch (Exception e)
+            {
+                await ReplyAsync(embed: ChatUtils.CreateEmbed("Temp-chan", e.Message, Color.Red));
+                await _logger.Log(new(LogSeverity.Error, "TempChan", e.Message, e));
+            }
+            finally
+            {
+                await (initMessage?.DeleteAsync() ?? Task.CompletedTask);
+                await Context.Message.DeleteAsync();
+            }
         }
 
         [Command("join")]

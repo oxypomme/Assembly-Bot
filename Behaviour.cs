@@ -34,7 +34,9 @@ namespace Assembly_Bot
                     if (_lastUpdate.AddHours(2) <= DateTime.Now)
                     {
                         _lastUpdate = DateTime.Now;
+#if !DEBUG
                         await _edt.ReloadEdt();
+#endif
                     }
                     /* Removed because useless + buggy
                     SocketTextChannel channel;
