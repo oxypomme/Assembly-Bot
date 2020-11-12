@@ -49,7 +49,7 @@ namespace Assembly_Bot
                 Console.Write(" " + message.Exception.StackTrace);
             Console.WriteLine();
             if (_client.ConnectionState == ConnectionState.Connected && message.Severity < LogSeverity.Info)
-                await LogOnDiscord("Something went wrong", "*" + message.Source + "*\n" + message.Message, color, isImportant: isImp).ConfigureAwait(true);
+                await LogOnDiscord("Something went wrong", "*" + message.Source + "*\n" + message.Message, color, isImportant: isImp);
             Console.ResetColor();
         }
 

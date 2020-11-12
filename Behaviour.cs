@@ -36,6 +36,8 @@ namespace Assembly_Bot
                         _lastUpdate = DateTime.Now;
                         await _edt.ReloadEdt();
                     }
+                    /* Removed because useless + buggy
+                    SocketTextChannel channel;
                     foreach (var edt in _edt.edts) //TODO: Tasks ?
                     {
                         Day day; // DayOfWeek.Sunday = 0, or in the JSON, Sunday is the 7th day
@@ -43,15 +45,13 @@ namespace Assembly_Bot
                             day = edt.Weeks[0].Days[6]; // Get the real Sunday
                         else
                             day = edt.Weeks[0].Days[(int)DateTime.Today.DayOfWeek - 1]; // Get the day
-
-                        SocketTextChannel channel;
 #if DEBUG
                         channel = Sandbox.main;
 #endif
                         foreach (var evnt in day.Events) //TODO: Tasks ?
                         {
                             var timeLeft = evnt.Dtstart.Subtract(DateTime.Now);
-                            if (timeLeft.Hours == 0 && timeLeft.Minutes <= 15 && !(_isAlreadyAlerted.falert && _isAlreadyAlerted.salert))
+                            if ((timeLeft.Hours == 0 && timeLeft.Minutes <= 15) && !(_isAlreadyAlerted.falert && _isAlreadyAlerted.salert))
                             {
                                 var eventSplitted = evnt.Summary.Split(" - ");
                                 // Mat - Group - Room - Type
@@ -63,26 +63,27 @@ namespace Assembly_Bot
                                 else
                                     channel = Apsu.infos[0];
 #endif
-                                if (timeLeft.Minutes == 15 && !_isAlreadyAlerted.falert)
+                                if ((timeLeft.Minutes == 15) && !_isAlreadyAlerted.falert)
                                 {
-                                    await ChatUtils.PingMessage(channel, $"{eventSplitted[0]} dans 15 minutes.");
                                     _isAlreadyAlerted.falert = true;
+                                    await ChatUtils.PingMessage(channel, $"{eventSplitted[0]} dans 15 minutes.");
                                 }
-                                else if (timeLeft.Minutes == 5 && !_isAlreadyAlerted.salert)
+                                else if ((timeLeft.Minutes == 5) && !_isAlreadyAlerted.salert)
                                 {
-                                    await ChatUtils.PingMessage(channel, $"{eventSplitted[0]} dans 5 minutes.", channel.Guild.EveryoneRole);
                                     _isAlreadyAlerted.salert = true;
+                                    await ChatUtils.PingMessage(channel, $"{eventSplitted[0]} dans 5 minutes.", channel.Guild.EveryoneRole);
                                 }
                             }
-                            else if ((timeLeft.Hours != 0 || timeLeft.Minutes != 10) && _isAlreadyAlerted.falert && _isAlreadyAlerted.salert)
+                            else if ((timeLeft.Hours != 0 || timeLeft.Minutes != 15) && _isAlreadyAlerted.falert && _isAlreadyAlerted.salert)
                             {
                                 _isAlreadyAlerted.falert = false;
                                 _isAlreadyAlerted.salert = false;
                             }
                         }
                     }
+                    */
                 }
-                catch (Exception e) { await _logger.Log(new LogMessage(LogSeverity.Error, "AlertStudents", e.Message, e)); }
+                catch (Exception e) { await _logger.Log(new(LogSeverity.Error, "AlertStudents", e.Message, e)); }
             });
         }
 
