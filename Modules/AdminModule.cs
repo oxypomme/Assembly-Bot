@@ -34,13 +34,19 @@ namespace Assembly_Bot.Modules
         {
             SocketVoiceChannel channel = Context.Guild.GetVoiceChannel(vid);
             if (vid == 0)
-                foreach (var vchat in Context.Guild.VoiceChannels)
-                    if (vchat.Users.Contains(Context.User))
-                    {
-                        channel = vchat;
-                        break;
-                    }
-
+            {
+                channel = ((SocketGuildUser)Context.User).VoiceChannel;
+                if (channel is null)
+                    foreach (var vchat in Context.Guild.VoiceChannels)
+                        if (vchat.Users.Contains(Context.User))
+                        {
+                            channel = vchat;
+                            break;
+                        }
+                if (channel is null)
+                    throw new ArgumentException("Je vous ai pas trouvé, déso pas déso");
+            }
+            await channel.AddPermissionOverwriteAsync(Context.Guild.EveryoneRole, new(speak: PermValue.Deny));
             foreach (var vuser in channel.Users)
                 await vuser.ModifyAsync((user) => user.Mute = true);
 
@@ -48,6 +54,7 @@ namespace Assembly_Bot.Modules
             await Context.Message.DeleteAsync();
 
             await Task.Delay(secs * 1000);
+            await channel.AddPermissionOverwriteAsync(Context.Guild.EveryoneRole, new(speak: PermValue.Allow));
             foreach (var vuser in channel.Users)
                 await vuser.ModifyAsync((user) => user.Mute = false);
 

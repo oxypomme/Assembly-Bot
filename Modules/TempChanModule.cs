@@ -230,12 +230,13 @@ namespace Assembly_Bot.Modules
 
         private bool CheckIfContextUserIsAdmin(out SocketTextChannel channel)
         {
-            channel = null;
-            foreach (var chan in Context.Guild.VoiceChannels.Where(chan => chan.Users.Contains(Context.User)))
-            {
-                channel = Context.Guild.TextChannels.First(c => string.Equals(c.Name, chan.Name, StringComparison.OrdinalIgnoreCase));
-                break;
-            }
+            channel = Context.Guild.TextChannels.First(chan => string.Equals(chan.Name, ((SocketGuildUser)Context.User).VoiceChannel.Name, StringComparison.OrdinalIgnoreCase));
+            if (channel is null)
+                foreach (var chan in Context.Guild.VoiceChannels.Where(chan => chan.Users.Contains(Context.User)))
+                {
+                    channel = Context.Guild.TextChannels.First(c => string.Equals(c.Name, chan.Name, StringComparison.OrdinalIgnoreCase));
+                    break;
+                }
 
             if (channel is null)
                 throw new KeyNotFoundException("T ou konnar");
@@ -260,7 +261,7 @@ namespace Assembly_Bot.Modules
                     if (user != Context.User)
                         await chan.Category.AddPermissionOverwriteAsync(user, new(viewChannel: PermValue.Allow));
                     if (user.VoiceChannel.Guild == Context.Guild)
-                        await user.ModifyAsync(u => u.Channel = (SocketVoiceChannel)((SocketCategoryChannel)chan.Category).Channels.First(c => c is SocketVoiceChannel vc && string.Equals(vc.Name, chan.Name, StringComparison.OrdinalIgnoreCase)));
+                        await user.ModifyAsync(u => u.Channel = ((SocketGuildUser)Context.User).VoiceChannel);
                     userEmbed[1].WithValue(userEmbed[1].Value + (userEmbed[1].Value is not null ? ", " : "") + user.Mention);
                 }
 
@@ -293,7 +294,7 @@ namespace Assembly_Bot.Modules
                     throw new AccessViolationException("Ptdr t ki");
 
                 await chan.Category.AddPermissionOverwriteAsync(user, new(viewChannel: PermValue.Deny));
-                if (user.VoiceChannel.Guild == Context.Guild && user.VoiceChannel == ((SocketCategoryChannel)chan.Category).Channels.First(c => string.Equals(c.Name, chan.Name, StringComparison.OrdinalIgnoreCase)))
+                if (user.VoiceChannel.Guild == Context.Guild && user.VoiceChannel == ((SocketGuildUser)Context.User).VoiceChannel)
                     await user.ModifyAsync(u => u.Channel = null);
                 else
                     throw new AccessViolationException("Dude, tu veux kick un mec qui est pas avec toi duh");
@@ -324,7 +325,7 @@ namespace Assembly_Bot.Modules
                 if (!CheckIfContextUserIsAdmin(out chan))
                     throw new AccessViolationException("Ptdr t ki");
                 await chan.Category.ModifyAsync(cat => cat.Name = "tmp-" + name);
-                await ((SocketVoiceChannel)((SocketCategoryChannel)chan.Category).Channels.First(c => c is SocketVoiceChannel vc && string.Equals(vc.Name, chan.Name, StringComparison.OrdinalIgnoreCase))).ModifyAsync(c => c.UserLimit = maxUsers);
+                await ((SocketGuildUser)Context.User).VoiceChannel.ModifyAsync(c => c.UserLimit = maxUsers);
             }
             catch (Exception e)
             {
