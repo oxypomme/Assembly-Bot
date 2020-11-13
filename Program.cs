@@ -86,10 +86,14 @@ namespace Assembly_Bot
                 {
                     try
                     {
-                        // Clear any empty temporary channel
-                        await services.GetRequiredService<Behaviour>().ClearTempChans(oldVoiceState.VoiceChannel);
-                        // [Specific APSU] Setup the cleaner for work channels
-                        await services.GetRequiredService<Behaviour>().GroupChatToClean(user, oldVoiceState, newVoiceState);
+                        // The user did move
+                        if (newVoiceState.VoiceChannel != oldVoiceState.VoiceChannel)
+                        {
+                            // Clear any empty temporary channel
+                            await services.GetRequiredService<Behaviour>().ClearTempChans(oldVoiceState.VoiceChannel);
+                            // [Specific APSU] Setup the cleaner for work channels
+                            await services.GetRequiredService<Behaviour>().GroupChatToClean(user, oldVoiceState, newVoiceState);
+                        }
                     }
                     catch (Exception ex) { await services.GetRequiredService<Logs>().Log(new(LogSeverity.Error, "VoiceStateUpdated", ex.Message, ex)); }
                 };
