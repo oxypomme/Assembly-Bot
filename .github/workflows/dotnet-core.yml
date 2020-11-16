@@ -25,7 +25,7 @@ jobs:
     runs-on: ubuntu-latest
   #  needs: [build]
     steps:
-    - name: Kill bot
+    - name: Kill Bot
       uses: appleboy/ssh-action@master
       continue-on-error: true
       with:
@@ -45,7 +45,7 @@ jobs:
         script: |
           cd ~/Assembly-Bot
           git pull
-    - name: Build
+    - name: Build Bot
       uses: appleboy/ssh-action@master
       with:
         host: ${{ secrets.HOST }}
@@ -53,7 +53,7 @@ jobs:
         password : ${{ secrets.PASSWORD }}
         port: ${{ secrets.PORT }}
         script: |
-          cd ~/Assembly-Bot
+          cd ~/Assembly-Bot/Assembly-Bot
           /usr/bin/dotnet/dotnet build --force -c Release
     - name: Run Bot
       uses: appleboy/ssh-action@master
@@ -64,4 +64,4 @@ jobs:
         port: ${{ secrets.PORT }}
         script: |
           screen -dmS "assemblybot"
-          screen -S "assemblybot" -p 0 -X stuff "cd ~/Assembly-Bot && export DOTNET_ROOT=/usr/bin/dotnet/ && export DOTNET_MULTILEVEL_LOOKUP=0 && export PATH=$PATH:/usr/bin/dotnet/ && dotnet run -c Release \n"
+          screen -S "assemblybot" -p 0 -X stuff "cd ~/Assembly-Bot/Assembly-Bot && export DOTNET_ROOT=/usr/bin/dotnet/ && export DOTNET_MULTILEVEL_LOOKUP=0 && export PATH=$PATH:/usr/bin/dotnet/ && dotnet run -c Release \n"
