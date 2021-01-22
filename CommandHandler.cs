@@ -18,6 +18,7 @@ namespace Assembly_Bot
 #else
         public const string prefix = "<<";
 #endif
+
         public CommandHandler(IServiceProvider services)
         {
             _services = services;
@@ -42,10 +43,13 @@ namespace Assembly_Bot
 
             var context = new SocketCommandContext(_client, message);
 
-            var result = await _commands.ExecuteAsync(context, argPos, _services);
-
-            if (!result.IsSuccess)
-                await context.Channel.SendMessageAsync(result.ErrorReason);
+#pragma warning disable CS4014 // Dans la mesure où cet appel n'est pas attendu, l'exécution de la méthode actuelle continue avant la fin de l'appel
+            _commands.ExecuteAsync(context, argPos, _services).ContinueWith(async t =>
+            {
+                if (!t.Result.IsSuccess)
+                    await context.Channel.SendMessageAsync(t.Result.ErrorReason);
+            });
+#pragma warning restore CS4014 // Dans la mesure où cet appel n'est pas attendu, l'exécution de la méthode actuelle continue avant la fin de l'appel
         }
     }
 }

@@ -120,7 +120,7 @@ namespace Assembly_Bot
                     await channel.RemovePermissionOverwriteAsync(user);
 
                     if (oldVoiceState.VoiceChannel.Users.Count == 0)
-                        while (await channel.GetMessagesAsync(1).FlattenAsync() is not null)
+                        while ((await channel.GetMessagesAsync(1).FlattenAsync()).Any())
                             await ChatUtils.CleanChannel(channel, 1);
                 }
 #else
@@ -130,7 +130,7 @@ namespace Assembly_Bot
                     await channel.RemovePermissionOverwriteAsync(user);
 
                     if (oldVoiceState.VoiceChannel.Users.Count == 0)
-                        while (await channel.GetMessageAsync(1) is not null)
+                        while ((await channel.GetMessagesAsync(1).FlattenAsync()).Any())
                             await ChatUtils.CleanChannel(channel, 100);
                 }
 #endif

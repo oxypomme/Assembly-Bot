@@ -86,12 +86,20 @@ namespace Assembly_Bot
                 {
                     try
                     {
-                        // Clear any empty temporary channel
-                        await services.GetRequiredService<Behaviour>().ClearTempChans(oldVoiceState.VoiceChannel);
-                        // [Specific APSU] Setup the cleaner for work channels
-                        await services.GetRequiredService<Behaviour>().GroupChatToClean(user, oldVoiceState, newVoiceState);
+#pragma warning disable CS4014 // Dans la mesure où cet appel n'est pas attendu, l'exécution de la méthode actuelle continue avant la fin de l'appel
+                        // The user did move
+                        if (newVoiceState.VoiceChannel != oldVoiceState.VoiceChannel)
+                        {
+                            // Clear any empty temporary channel
+                            services.GetRequiredService<Behaviour>().ClearTempChans(oldVoiceState.VoiceChannel)
+                                .ContinueWith(async t => await _loggger.Log(new(LogSeverity.Error, "VoiceStateUpdated", t.Exception.Message, t.Exception)), TaskContinuationOptions.OnlyOnFaulted);
+                            // [Specific APSU] Setup the cleaner for work channels
+                            services.GetRequiredService<Behaviour>().GroupChatToClean(user, oldVoiceState, newVoiceState)
+                                .ContinueWith(async t => await _loggger.Log(new(LogSeverity.Error, "VoiceStateUpdated", t.Exception.Message, t.Exception)), TaskContinuationOptions.OnlyOnFaulted);
+                        }
+#pragma warning restore CS4014 // Dans la mesure où cet appel n'est pas attendu, l'exécution de la méthode actuelle continue avant la fin de l'appel
                     }
-                    catch (Exception ex) { await services.GetRequiredService<Logs>().Log(new(LogSeverity.Error, "VoiceStateUpdated", ex.Message, ex)); }
+                    catch (Exception ex) { await _loggger.Log(new(LogSeverity.Error, "VoiceStateUpdated", ex.Message, ex)); }
                 };
 
                 // Setup a Timer
