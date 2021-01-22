@@ -96,7 +96,7 @@ namespace Assembly_Bot
                                     embed: ChatUtils.CreateEmbed(
                                         new EmbedBuilder()
                                         {
-                                            Title = ":date: " + (i == 0 ? "Groupe 1.1 (EL)" : "Groupe 2.1 (IP)"),
+                                            Title = ":date: " + (i == 0 ? "Groupe 2.1 (IP)" : "Groupe 1.1 (EL)"),
                                             Description = $"Semaine du {DateTime.Today.AddDays(offset * 7).StartOfWeek(DayOfWeek.Monday):dd/MM} au {DateTime.Today.AddDays(offset * 7).EndOfWeek(DayOfWeek.Monday):dd/MM}.",
                                             Fields = new()
                                             {
