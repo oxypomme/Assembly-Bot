@@ -18,8 +18,8 @@ namespace Assembly_Bot.Models
             infos = new()
             {
                 server.GetTextChannel(773546790090833920),
-                server.GetTextChannel(773546828947259443),
-                server.GetTextChannel(773546852183310337)
+                server.GetTextChannel(801852353284014141),
+                server.GetTextChannel(801852350876090399)
             };
             edts = new()
             {

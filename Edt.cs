@@ -17,7 +17,7 @@ namespace Assembly_Bot
     {
         public List<Models.Edt> edts = new List<Models.Edt>();
 
-        private static readonly string[] edtCodes = { "4352c5485001785", "1c57595e2401824" };
+        private static readonly string[] edtCodes = { "4352c5485001785", "61a1e3f48601861" };
 
         private RestUserMessage[] _edtMessages = new RestUserMessage[edtCodes.Length];
         private bool _edtIsSundayAlreadyPosted;
