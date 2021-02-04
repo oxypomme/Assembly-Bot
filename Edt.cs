@@ -58,11 +58,11 @@ namespace Assembly_Bot
 
                             int offset = 0;
                             string imgGeneretadApi = "";
-                            bool isEdtDownloaded = forceDOWN || isJsonUpdated || (DateTime.Today.DayOfWeek == DayOfWeek.Sunday && !_edtIsSundayAlreadyPosted);
+                            bool isEdtDownloaded = forceDOWN || isJsonUpdated || (DateTime.Today.DayOfWeek == DayOfWeek.Saturday && !_edtIsSundayAlreadyPosted);
                             if (isEdtDownloaded)
                             {
                                 // Download the table
-                                if (DateTime.Today.DayOfWeek == DayOfWeek.Sunday)
+                                if (DateTime.Today.DayOfWeek == DayOfWeek.Saturday)
                                 {
                                     _edtIsSundayAlreadyPosted = true;
                                     offset = 1;
